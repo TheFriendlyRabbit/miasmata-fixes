@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
 from gimpfu import *
+
 from miasmata_gimp import *
 
 font = Font('Georgia', 84.0, False)
 max_font_size = 84.0
 max_width = 350
+
 
 # Alternate close match:
 # font = Font('Century Schoolbook L Bold', 73.0, True)
@@ -23,12 +25,14 @@ def compose_tab(tab_txt_file, source_blank_image, output_basename):
         font_size -= 1
         pdb.gimp_text_layer_set_font_size(layer, font_size, PIXELS)
 
-    place_text(layer, image.width / 2, image.height / 2, xalign=CENTER, yalign=CENTER)
+    place_text(layer, image.width / 2, image.height / 2, xalign=CENTER,
+               yalign=CENTER)
 
     save_xcf(image, '%s.xcf' % output_basename)
     image.merge_visible_layers(CLIP_TO_IMAGE)
     save_dds(image, '%s.dds' % output_basename, False)
     save_jpg(image, '%s.jpg' % output_basename)
+
 
 register(
     "miasmata_journal_tabs",
@@ -40,8 +44,12 @@ register(
     "<Toolbox>/_Miasmata/_Tabs",
     None,
     [
-        (PF_FILE, "tab_txt_file", "utf-8 encoded file with the text to place on the tab.", None),
-        (PF_FILE, "source_blank_image", "Background image to use that should have previously had the text removed", None),
+        (PF_FILE, "tab_txt_file",
+         "utf-8 encoded file with the text to place on the tab.", None),
+        (PF_FILE, "source_blank_image",
+         "Background image to use that should have previously had the text "
+         "removed",
+         None),
         (PF_STRING, "output_basename", "Base output filename", None),
     ],
     [],

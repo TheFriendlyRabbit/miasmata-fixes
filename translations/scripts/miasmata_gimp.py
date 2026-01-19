@@ -1,22 +1,28 @@
 #!/usr/bin/env python
 
-from gimpfu import *
 import re
+
+from gimpfu import *
 
 LEFT = TOP = 0
 CENTER = 1
 RIGHT = BOTTOM = 2
 
+
 class Font(object):
-    def __init__(self, font, size, bold = False, line_spacing = 0.0, letter_spacing = 0.0):
-        self.font, self.size, self.bold, self.line_spacing, self.letter_spacing = \
-                font, size, bold, line_spacing, letter_spacing
+    def __init__(self, font, size, bold=False, line_spacing=0.0,
+                 letter_spacing=0.0):
+        (self.font, self.size, self.bold, self.line_spacing,
+         self.letter_spacing) = \
+            font, size, bold, line_spacing, letter_spacing
+
 
 def get_layer_by_name(image, name):
     for l in image.layers:
         if l.name == name:
             return l
     raise KeyError(name)
+
 
 def add_layer_mask_from_other_layer_alpha(dest, source):
     image = dest.image
@@ -25,10 +31,14 @@ def add_layer_mask_from_other_layer_alpha(dest, source):
     pdb.gimp_layer_add_mask(dest, mask)
     pdb.gimp_selection_none(image)
 
-def add_text_layer(image, txt, font, font_size, line_spacing = None, colour = (0, 0, 0), name = 'Text', pos = (0, 0), letter_spacing=None):
+
+def add_text_layer(image, txt, font, font_size, line_spacing=None,
+                   colour=(0, 0, 0), name='Text', pos=(0, 0),
+                   letter_spacing=None):
     gimp.set_foreground(*colour)
     pdb.gimp_image_set_active_layer(image, image.layers[0])
-    text = pdb.gimp_text_fontname(image, None, pos[0], pos[1], txt, 0, True, font_size, PIXELS, font)
+    text = pdb.gimp_text_fontname(image, None, pos[0], pos[1], txt, 0, True,
+                                  font_size, PIXELS, font)
     if text is None:
         return
     text.name = name
@@ -40,54 +50,60 @@ def add_text_layer(image, txt, font, font_size, line_spacing = None, colour = (0
 
     return text
 
+
 def read_text(filename):
     return open(filename, 'rb').read().decode('utf-8').strip()
 
+
 def get_plant_name(plant):
     plant_num = {
-            'violet cactus': '00',
-            'prickly pear': 0,
-            'common white mushroom': 1,
-            'pawn-shaped mushroom': 2,
-            'red toadstool': 3,
-            'pearl-blue shelf fungus': 4,
-            'yellow mushrooms': 5,
-            'grey shelf fungus': 6,
-            'brown shelf fungus': 7,
-            'sponge-like fungus': 8,
-            'wood gill fungus': 9,
-            'trumpet mushroom': 10,
-            'white spiked prairie flower': 11,
-            'pink-white prairie flower': 12,
-            'orange prairie flower': 13,
-            'white bundle prairie flower': 14,
-            'sunflower': 15,
-            'indigo asteraceae': 16,
-            'red and yellow hibiscus': 17,
-            'white/pink viola': 18,
-            'blue-capped toadstool': 19,
-            'red-green tree fungus': 20,
-            'fleshy rooted plant': 21,
-            'pink spotted lily': 22,
-            'rainbow orchid': 23,
-            'titan plant': 24,
-            'giant bloom': 25,
-            'bulbous, fruit plant': 26,
-            'carnivorous pitcher plant': 27,
-            'carnivorous trap plant': 28,
-            'fabaceae': 29,
-            'bio-luminescent algae': 30,
-            'blue scaly tree fungus': 31,
-            'large jungle flower': 32,
-            'tropical buttercup': 33,
-            'fleshy purple fruit': 34,
-
+        'violet cactus': '00',
+        'prickly pear': 0,
+        'common white mushroom': 1,
+        'pawn-shaped mushroom': 2,
+        'red toadstool': 3,
+        'pearl-blue shelf fungus': 4,
+        'yellow mushrooms': 5,
+        'grey shelf fungus': 6,
+        'brown shelf fungus': 7,
+        'sponge-like fungus': 8,
+        'wood gill fungus': 9,
+        'trumpet mushroom': 10,
+        'white spiked prairie flower': 11,
+        'pink-white prairie flower': 12,
+        'orange prairie flower': 13,
+        'white bundle prairie flower': 14,
+        'sunflower': 15,
+        'indigo asteraceae': 16,
+        'red and yellow hibiscus': 17,
+        'white/pink viola': 18,
+        'blue-capped toadstool': 19,
+        'red-green tree fungus': 20,
+        'fleshy rooted plant': 21,
+        'pink spotted lily': 22,
+        'rainbow orchid': 23,
+        'titan plant': 24,
+        'giant bloom': 25,
+        'bulbous, fruit plant': 26,
+        'carnivorous pitcher plant': 27,
+        'carnivorous trap plant': 28,
+        'fabaceae': 29,
+        'bio-luminescent algae': 30,
+        'blue scaly tree fungus': 31,
+        'large jungle flower': 32,
+        'tropical buttercup': 33,
+        'fleshy purple fruit': 34,
 
     }
-    return read_text('../plants/Plant_%s.txt' % str(plant_num[plant])).split('\n')[0]
+    return \
+        read_text('../plants/Plant_%s.txt' % str(plant_num[plant])).split('\n')[
+            0]
 
-def add_text(image, txt, font, colour = (0, 0, 0)):
-    layer = add_text_layer(image, txt, font.font, font.size, font.line_spacing, colour, letter_spacing=font.letter_spacing)
+
+def add_text(image, txt, font, colour=(0, 0, 0)):
+    layer = add_text_layer(image, txt, font.font, font.size, font.line_spacing,
+                           colour,
+                           letter_spacing=font.letter_spacing)
     if layer is None:
         return None
     pdb.gimp_text_layer_set_markup(layer, txt)
@@ -95,11 +111,14 @@ def add_text(image, txt, font, colour = (0, 0, 0)):
         bold_text(layer, txt)
     return layer
 
+
 def add_text_layer_from_file(image, filename, font, colour=(0, 0, 0)):
     txt = read_text(filename)
     return add_text(image, txt, font, colour)
 
-def place_text(layer, x, y, x2=None, y2=None, w=None, h=None, xalign=LEFT, yalign=TOP):
+
+def place_text(layer, x, y, x2=None, y2=None, w=None, h=None, xalign=LEFT,
+               yalign=TOP):
     if layer is None:
         return
     if x2 is not None:
@@ -126,9 +145,12 @@ def place_text(layer, x, y, x2=None, y2=None, w=None, h=None, xalign=LEFT, yalig
             y = y - layer.height
     layer.translate(x, y)
 
+
 def center_layer(layer):
     image = layer.image
-    return place_text(layer, image.width/2, image.height/2, xalign=CENTER, yalign=CENTER)
+    return place_text(layer, image.width / 2, image.height / 2, xalign=CENTER,
+                      yalign=CENTER)
+
 
 def reduce_text_to_fit(layer, x1, x2):
     (font_size, units) = pdb.gimp_text_layer_get_font_size(layer)
@@ -136,18 +158,20 @@ def reduce_text_to_fit(layer, x1, x2):
         font_size -= 1
         pdb.gimp_text_layer_set_font_size(layer, font_size, units)
 
+
 def reduce_and_wrap_text_to_fit(layer, text, font, x1, x2, y1, y2):
     (font_size, units) = pdb.gimp_text_layer_get_font_size(layer)
     while True:
         if font.bold:
-            remaining = bold_word_wrap(layer, text, x2 - x1, max_height = y2 - y1)
+            remaining = bold_word_wrap(layer, text, x2 - x1, max_height=y2 - y1)
         else:
-            remaining = word_wrap(layer, text, x2 - x1, max_height = y2 - y1)
+            remaining = word_wrap(layer, text, x2 - x1, max_height=y2 - y1)
         if not remaining:
             break
         font_size -= 1
         pdb.gimp_text_layer_set_font_size(layer, font_size, units)
     place_text(layer, x1, y1)
+
 
 def reduce_text_line_spacing_to_fit(layer, height):
     line_spacing = pdb.gimp_text_layer_get_line_spacing(layer)
@@ -155,11 +179,14 @@ def reduce_text_line_spacing_to_fit(layer, height):
         line_spacing -= 1
         pdb.gimp_text_layer_set_line_spacing(layer, line_spacing)
 
+
 def get_markup(layer):
     markup = pdb.gimp_text_layer_get_markup(layer)
-    if markup.lower().startswith('<markup>') and markup.lower().endswith('</markup>'):
+    if markup.lower().startswith('<markup>') and markup.lower().endswith(
+            '</markup>'):
         return markup[8:-9]
     return markup
+
 
 def bold_text(layer, txt=None):
     # XXX: Requires a patched GIMP to set text markup
@@ -169,6 +196,7 @@ def bold_text(layer, txt=None):
     markup = '<b>%s</b>' % txt
     pdb.gimp_text_layer_set_markup(layer, markup)
 
+
 def underline_text(layer):
     # XXX: Requires a patched GIMP to set text markup
     # See https://bugzilla.gnome.org/show_bug.cgi?id=724101
@@ -176,9 +204,12 @@ def underline_text(layer):
     markup = '<u>%s</u>' % markup
     pdb.gimp_text_layer_set_markup(layer, markup)
 
+
 # Brackets in the regex make this partition instead of split:
 tag_partitions_re = re.compile(r'(\<[^\>]*\>)')
 tag_re = re.compile(r'\</?([^\> ]+)[^\>]*\>')
+
+
 def tag_preserving_split(text, sep=' '):
     tags = []
     ret = []
@@ -189,12 +220,12 @@ def tag_preserving_split(text, sep=' '):
     for partition in partitions:
         # Keep a stack of currently active tags
         if partition.startswith('</'):
-            #FIXME: Check popping expected tag
+            # FIXME: Check popping expected tag
             tags.pop()
             continue
         match = tag_re.match(partition)
         if match:
-            #assert(tags == []) # Likely have a bug in this case. Fail now
+            # assert(tags == []) # Likely have a bug in this case. Fail now
             tags.append((partition, '</%s>' % match.group(1)))
             continue
 
@@ -216,6 +247,7 @@ def tag_preserving_split(text, sep=' '):
             else:
                 ret.append(word)
     return ret
+
 
 def _tag_preserving_join(text_lh, text_rh, sep=''):
     making_progress = True
@@ -241,7 +273,7 @@ def _tag_preserving_join(text_lh, text_rh, sep=''):
                 if partition.startswith('</'):
                     tags.append(partition)
                 elif partition.startswith('<'):
-                    #FIXME: Check popping expected tag
+                    # FIXME: Check popping expected tag
                     tags.pop()
                     if tags == []:
                         # No tags left on stack, so whatever tag we just popped
@@ -253,6 +285,7 @@ def _tag_preserving_join(text_lh, text_rh, sep=''):
                         break
     return '%s%s%s' % (text_lh, sep, text_rh)
 
+
 def tag_preserving_join(sep, lst):
     if lst == []:
         return ''
@@ -261,24 +294,30 @@ def tag_preserving_join(sep, lst):
         ret = _tag_preserving_join(ret, lst.pop(0), sep)
     return ret
 
-def masked_word_wrap(layer, mask, max_width, channel = VALUE_MODE, threshold = 128, test = -1, hpad = 5, vpad = -2):
+
+def masked_word_wrap(layer, mask, max_width, channel=VALUE_MODE, threshold=128,
+                     test=-1, hpad=5, vpad=-2):
     import struct
 
-    def find_room_in_mask(min_x, min_y, max_x, start_x, required_w, required_h, right_justify = False):
+    def find_room_in_mask(min_x, min_y, max_x, start_x, required_w, required_h,
+                          right_justify=False):
         gimp.tile_cache_ntiles((required_h + 2 * vpad + 63) / 64)
         direction = 1
         if right_justify:
             direction = -1
         (x, y) = (start_x, min_y)
-        xt = x - hpad*direction
+        xt = x - hpad * direction
         while True:
             for yt in range(y - vpad, y + required_h + vpad):
                 tile = mask.get_tile2(False, xt, yt)
                 if tile is None:
-                    print 'WARNING find_room_in_mask: No tile for %i x %i!' % (xt, yt)
+                    print(
+                        'WARNING find_room_in_mask: No tile for %i x %i!' % (xt,
+                                                                             yt))
                     continue
                 # FIXME: Assumes 32bpp 8bit channel and ignores alpha
-                channels = (r, g, b, a) = struct.unpack('4B', tile[xt % tile.ewidth, yt % tile.eheight])
+                channels = (r, g, b, a) = struct.unpack('4B', tile[
+                    xt % tile.ewidth, yt % tile.eheight])
                 if channel == VALUE_MODE:
                     v = (r + g + b) * a / (3 * 255)
                 elif channel == ALPHA_CHANNEL:
@@ -287,19 +326,20 @@ def masked_word_wrap(layer, mask, max_width, channel = VALUE_MODE, threshold = 1
                     v = channels[channel]
                 if cmp(v, threshold) == test:
                     # print "mask intersected at %i x %i" % (x, y)
-                    x = xt + hpad*direction
+                    x = xt + hpad * direction
                     break
             if not right_justify and xt - x >= required_w + hpad:
                 return (x, y)
             elif right_justify and x - xt >= required_w + hpad:
                 return (x, y)
             xt += direction
-            if (not right_justify and xt - hpad > max_x) or (right_justify and xt - hpad < min_x):
+            if (not right_justify and xt - hpad > max_x) or (
+                    right_justify and xt - hpad < min_x):
                 if right_justify:
                     raise IndexError("not enough room")
                 y += required_h + int(line_spacing)
                 x = min_x
-                xt = x - hpad*direction
+                xt = x - hpad * direction
 
     image = layer.image
     text = pdb.gimp_text_layer_get_text(layer)
@@ -329,7 +369,7 @@ def masked_word_wrap(layer, mask, max_width, channel = VALUE_MODE, threshold = 1
     # FIXME: Probe for this:
     word_spacing = 10
 
-    def place_line(line, x): # Not used for left justification
+    def place_line(line, x):  # Not used for left justification
         # XXX: This is actually a stripped down version of this very outer
         # routine to place the text left justified starting at the calculated x
         # position - I could potentially refactor this code and call it
@@ -339,25 +379,27 @@ def masked_word_wrap(layer, mask, max_width, channel = VALUE_MODE, threshold = 1
             if not text:
                 x += word_spacing
                 continue
-            (x, _) = find_room_in_mask(min_x, y, min_x + max_width, x, text.width, text.height)
+            (x, _) = find_room_in_mask(min_x, y, min_x + max_width, x,
+                                       text.width, text.height)
             text.set_offsets(x, y)
             x += text.width + word_spacing
 
     for paragraph in text.split('\n'):
-        #words = paragraph.split(' ')
+        # words = paragraph.split(' ')
         words = tag_preserving_split(paragraph, ' ')
         if justification == TEXT_JUSTIFY_RIGHT:
             x = min_x + max_width
         else:
             x = min_x
-        line = [] # Not used for left justification
+        line = []  # Not used for left justification
         for word in words:
             if not word:
                 x += word_spacing
                 line.append(None)
                 continue
 
-            text = pdb.gimp_text_fontname(image, None, x, y, word, 0, True, font_size, font_units, font)
+            text = pdb.gimp_text_fontname(image, None, x, y, word, 0, True,
+                                          font_size, font_units, font)
             pdb.gimp_text_layer_set_markup(text, word)
 
             paragraph_spacing = paragraph_spacing or text.height
@@ -366,7 +408,9 @@ def masked_word_wrap(layer, mask, max_width, channel = VALUE_MODE, threshold = 1
             if justification == TEXT_JUSTIFY_RIGHT:
                 while True:
                     try:
-                        (x, _) = find_room_in_mask(min_x, y, min_x + max_width, x, text.width, text.height, True)
+                        (x, _) = find_room_in_mask(min_x, y, min_x + max_width,
+                                                   x, text.width, text.height,
+                                                   True)
                         line.append(text)
                         break
                     except IndexError:
@@ -374,7 +418,8 @@ def masked_word_wrap(layer, mask, max_width, channel = VALUE_MODE, threshold = 1
                         y += text.height + int(line_spacing)
                         x = min_x + max_width
             else:
-                (x, y) = find_room_in_mask(min_x, y, min_x + max_width, x, text.width, text.height)
+                (x, y) = find_room_in_mask(min_x, y, min_x + max_width, x,
+                                           text.width, text.height)
                 # print 'Placing %s at %i x %i' % (word, x, y)
                 text.set_offsets(x, y)
 
@@ -389,7 +434,11 @@ def masked_word_wrap(layer, mask, max_width, channel = VALUE_MODE, threshold = 1
 
     return group
 
-word_wrap_fail_re = re.compile(r"""Element 'markup' was closed, but the currently open element is '(?P<elem>[^']+)'""")
+
+word_wrap_fail_re = re.compile(
+    r"""Element 'markup' was closed, but the currently open element is '(
+    ?P<elem>[^']+)'""")
+
 
 def balance_newlines(layer):
     import sys
@@ -401,7 +450,7 @@ def balance_newlines(layer):
 
     def width(lines):
         missing_tags = ''
-        while True: # Hack to avoid splitting up <span> tags
+        while True:  # Hack to avoid splitting up <span> tags
             text = '\n'.join([' '.join(l) for l in lines])
             markup = '%s%s' % (text, missing_tags)
             try:
@@ -423,11 +472,11 @@ def balance_newlines(layer):
             except ValueError:
                 break
             else:
-                print 'Joining split span tag'
-                line[i] = '%s %s' % (line[i], line[i+1])
-                del line[i+1]
+                print('Joining split span tag')
+                line[i] = '%s %s' % (line[i], line[i + 1])
+                del line[i + 1]
 
-    print >>sys.stderr, 'Before - max width:',  width(lines)
+    print('Before - max width:', width(lines), file=sys.stderr)
 
     making_progress = True
     while making_progress:
@@ -436,27 +485,28 @@ def balance_newlines(layer):
             if not len(l):
                 continue
             if i > 0:
-                ow = width(lines[i-1:i+1])
-                lines[i-1].append(l.pop(0))
-                nw = width(lines[i-1:i+1])
+                ow = width(lines[i - 1:i + 1])
+                lines[i - 1].append(l.pop(0))
+                nw = width(lines[i - 1:i + 1])
                 if nw < ow:
                     making_progress = True
                     break
-                l.insert(0, lines[i-1].pop(-1))
+                l.insert(0, lines[i - 1].pop(-1))
             if i < len(lines) - 1:
-                ow = width(lines[i:i+2])
-                lines[i+1].insert(0, l.pop(-1))
-                nw = width(lines[i:i+2])
+                ow = width(lines[i:i + 2])
+                lines[i + 1].insert(0, l.pop(-1))
+                nw = width(lines[i:i + 2])
                 if nw < ow:
                     making_progress = True
                     break
-                l.append(lines[i+1].pop(0))
+                l.append(lines[i + 1].pop(0))
 
-    print >>sys.stderr, 'After - max width:', width(lines)
+    print('After - max width:', width(lines), file=sys.stderr)
     for l in lines:
-        print ' '.join(l)
+        print(' '.join(l))
 
-def word_wrap(layer, text, width, max_height = None, start_tag='', end_tag=''):
+
+def word_wrap(layer, text, width, max_height=None, start_tag='', end_tag=''):
     # This is a workaround for the lack of a fixed-width + dynamic-height
     # setting for text boxes in the GIMP - otherwise there is no easy way to
     # wrap the text AND have it vertically centered.
@@ -485,7 +535,8 @@ def word_wrap(layer, text, width, max_height = None, start_tag='', end_tag=''):
                 pdb.gimp_text_layer_set_markup(layer, markup)
                 rem_line = tag_preserving_join(' ', [word] + words).strip()
                 rem_lines = tag_preserving_join('\n', lines)
-                return '\n' + tag_preserving_join('\n', [rem_line, rem_lines]).strip()
+                return '\n' + tag_preserving_join('\n',
+                                                  [rem_line, rem_lines]).strip()
             txt = txt1
 
         while len(words):
@@ -499,17 +550,21 @@ def word_wrap(layer, text, width, max_height = None, start_tag='', end_tag=''):
                 markup = '%s%s%s' % (start_tag, txt1, end_tag)
                 pdb.gimp_text_layer_set_markup(layer, markup)
                 if max_height is not None and layer.height > max_height:
-                    markup = '%s%s%s' % (start_tag, txt, end_tag) # FIXME: Will break if splitting markup!
+                    markup = '%s%s%s' % (start_tag, txt,
+                                         end_tag)  # FIXME: Will break if
+                    # splitting markup!
                     pdb.gimp_text_layer_set_markup(layer, markup)
 
                     rem_line = tag_preserving_join(' ', [word] + words).strip()
                     rem_lines = tag_preserving_join('\n', lines)
-                    return tag_preserving_join('\n', [rem_line, rem_lines]).strip()
+                    return tag_preserving_join('\n',
+                                               [rem_line, rem_lines]).strip()
                 width = max(width, layer.width)
             txt = txt1
     return ''
 
-def word_wrap_balanced(layer,  width):
+
+def word_wrap_balanced(layer, width):
     text = pdb.gimp_text_layer_get_text(layer)
     if not text:
         text = get_markup(layer)
@@ -526,6 +581,7 @@ def word_wrap_balanced(layer,  width):
         out.append(get_markup(layer))
     # print out
     pdb.gimp_text_layer_set_markup(layer, '\n'.join(out))
+
 
 def word_wrap_reverse(layer, width):
     text = pdb.gimp_text_layer_get_text(layer)
@@ -545,82 +601,94 @@ def word_wrap_reverse(layer, width):
         txt = txt1
     return ''
 
-def bold_word_wrap(layer, text, width, max_height = None):
-    return word_wrap(layer, text, width, max_height, start_tag='<b>', end_tag='</b>')
 
-def blur_layer(image, layer, radius = 1.5):
+def bold_word_wrap(layer, text, width, max_height=None):
+    return word_wrap(layer, text, width, max_height, start_tag='<b>',
+                     end_tag='</b>')
+
+
+def blur_layer(image, layer, radius=1.5):
     pdb.plug_in_gauss_rle2(image, layer, radius, radius)
+
 
 def save_dds(image, filename, alpha, mipmaps=False):
     alpha = alpha and 3 or 1
     try:
         pdb.file_dds_save(
-                image,
-                image.active_layer,
-                filename, # filename
-                filename, # raw_filename
-                alpha, # 1 = DXT1 (no alpha), 3 = DXT5 (alpha)
-                mipmaps, # 1 = generate mipmaps <--- XXX Set this for in-game objects
-                0, # 0 = save current layer
-                0, # format
-                -1, # transparent-index
-                0, # DXT compression color-type (Tweaking may help in some cases)
-                0, # Dither
-                0, # mipmap-filter - maybe try tweaking this for in-game objects
-                0, # gamma-correct
-                2.2, # gamma
+            image,
+            image.active_layer,
+            filename,  # filename
+            filename,  # raw_filename
+            alpha,  # 1 = DXT1 (no alpha), 3 = DXT5 (alpha)
+            mipmaps,
+            # 1 = generate mipmaps <--- XXX Set this for in-game objects
+            0,  # 0 = save current layer
+            0,  # format
+            -1,  # transparent-index
+            0,  # DXT compression color-type (Tweaking may help in some cases)
+            0,  # Dither
+            0,  # mipmap-filter - maybe try tweaking this for in-game objects
+            0,  # gamma-correct
+            2.2,  # gamma
         )
     except:
         # Try newer API
         pdb.file_dds_save(
-                image,
-                image.active_layer,
-                filename, # filename
-                filename, # raw_filename
-                alpha, # 1 = DXT1 (no alpha), 3 = DXT5 (alpha)
-                mipmaps, # 1 = generate mipmaps <--- XXX Set this for in-game objects
-                0, # 0 = save current layer
-                0, # format
-                -1, # transparent-index
-                0, # mipmap-filter - maybe try tweaking this for in-game objects
-                0, # mipmap-wrap
-                0, # gamma-correct
-                0, # use srgb colorspace for gamma correction
-                2.2, # gamma
-                0, # use perceptual error metric during DXT compression
-                0, # preserve alpha coverage
-                0.5, # alpha test threshold
+            image,
+            image.active_layer,
+            filename,  # filename
+            filename,  # raw_filename
+            alpha,  # 1 = DXT1 (no alpha), 3 = DXT5 (alpha)
+            mipmaps,
+            # 1 = generate mipmaps <--- XXX Set this for in-game objects
+            0,  # 0 = save current layer
+            0,  # format
+            -1,  # transparent-index
+            0,  # mipmap-filter - maybe try tweaking this for in-game objects
+            0,  # mipmap-wrap
+            0,  # gamma-correct
+            0,  # use srgb colorspace for gamma correction
+            2.2,  # gamma
+            0,  # use perceptual error metric during DXT compression
+            0,  # preserve alpha coverage
+            0.5,  # alpha test threshold
         )
+
 
 def save_png(image, filename):
     pdb.file_png_save2(image, image.active_layer, filename, filename,
-            0, # interlace
-            9, # compression
-            0, # save background colour
-            0, # save gamma
-            0, # save layer offset
-            1, # save pHYs (resolution?)
-            1, # save creation time
-            1, # save comment
-            1, # preserve colour of transparent pixels
-    )
+                       0,  # interlace
+                       9,  # compression
+                       0,  # save background colour
+                       0,  # save gamma
+                       0,  # save layer offset
+                       1,  # save pHYs (resolution?)
+                       1,  # save creation time
+                       1,  # save comment
+                       1,  # preserve colour of transparent pixels
+                       )
+
 
 def save_jpg(image, filename):
     pdb.file_jpeg_save(image, image.active_layer, filename, filename,
-            0.9, # quality
-            0.0, # smoothing
-            1, # optimize
-            0, # progressive
-            "Generated by DarkStarSword's Miasmata translation scripts", # comment
-            0, # Subsampling option number. 0 = 4:4:4?
-            1, # baseline
-            0, # restart
-            1, # dct algorithm. 1 = Integer?
-    )
+                       0.9,  # quality
+                       0.0,  # smoothing
+                       1,  # optimize
+                       0,  # progressive
+                       "Generated by DarkStarSword's Miasmata translation "
+                       "scripts",
+                       # comment
+                       0,  # Subsampling option number. 0 = 4:4:4?
+                       1,  # baseline
+                       0,  # restart
+                       1,  # dct algorithm. 1 = Integer?
+                       )
+
 
 def save_xcf(image, filename):
     pdb.gimp_xcf_save(0, image, image.active_layer, filename, filename)
     image.clean_all()
+
 
 def save(image, output_basename, alpha=False, png=False, mipmaps=False):
     save_xcf(image, '%s.xcf' % output_basename)

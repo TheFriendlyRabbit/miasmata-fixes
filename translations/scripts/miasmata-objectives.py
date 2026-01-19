@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from gimpfu import *
+
 from miasmata_gimp import *
 
 indent_a = 114
@@ -13,9 +14,11 @@ font_note = Font('Neu Phollick Alpha', 22.0, True)
 objnote_x1 = 57
 objnote_x2 = 200
 
+
 class Objective(object):
     def __init__(self, indent=indent_a, y=5, y2=None, font=font_a):
         self.indent, self.y, self.y2, self.font = indent, y, y2, font
+
 
 objectives = {
     'OBJECTIVE_A_Placeholder': Objective(),
@@ -29,7 +32,9 @@ objectives = {
     'OBJECTIVE_H': Objective(y=8, font=font_b),
 }
 
-def compose_objective_image(objective_name, source_blank_image, output_basename):
+
+def compose_objective_image(objective_name, source_blank_image,
+                            output_basename):
     objective = objectives[objective_name]
     image = pdb.gimp_file_load(source_blank_image, source_blank_image)
     text = read_text('%s.txt' % objective_name)
@@ -37,15 +42,19 @@ def compose_objective_image(objective_name, source_blank_image, output_basename)
 
     if objective.y2:
         reduce_and_wrap_text_to_fit(text_layer, text, objective.font,
-                objective.indent, objective_x2, objective.y, objective.y2)
+                                    objective.indent, objective_x2, objective.y,
+                                    objective.y2)
     else:
         orig_height = text_layer.height
         reduce_text_to_fit(text_layer, objective.indent, objective_x2)
-        place_text(text_layer, objective.indent, objective.y + orig_height/2, yalign=CENTER)
+        place_text(text_layer, objective.indent, objective.y + orig_height / 2,
+                   yalign=CENTER)
 
     save(image, output_basename)
 
-def compose_objective_page(source_txt_file, source_blank_image, output_basename):
+
+def compose_objective_page(source_txt_file, source_blank_image,
+                           output_basename):
     image = pdb.gimp_file_load(source_blank_image, source_blank_image)
     (primary, secondary) = read_text(source_txt_file).split('\n', 1)
 
@@ -57,7 +66,9 @@ def compose_objective_page(source_txt_file, source_blank_image, output_basename)
 
     save(image, output_basename)
 
-def compose_objective_note(source_txt_file, source_blank_image, output_basename):
+
+def compose_objective_note(source_txt_file, source_blank_image,
+                           output_basename):
     image = pdb.gimp_file_load(source_blank_image, source_blank_image)
     try:
         pdb.gimp_image_convert_rgb(image)
@@ -68,12 +79,14 @@ def compose_objective_note(source_txt_file, source_blank_image, output_basename)
     if 'Plant' in source_txt_file:
         colour = (50, 40, 190)
 
-    text_layer = add_text_layer_from_file(image, source_txt_file, font_note, colour=colour)
+    text_layer = add_text_layer_from_file(image, source_txt_file, font_note,
+                                          colour=colour)
     pdb.gimp_layer_set_mode(text_layer, MULTIPLY_MODE)
     reduce_text_to_fit(text_layer, objnote_x1, objnote_x2)
     place_text(text_layer, objnote_x1, image.height / 2, yalign=CENTER)
 
     save(image, output_basename, png=True)
+
 
 register(
     "miasmata_objective",
@@ -85,8 +98,14 @@ register(
     "<Toolbox>/_Miasmata/_Objective",
     None,
     [
-        (PF_FILE, "objective_name", "Name of the objective. There must be a utf-8 encoded text file of this name.", None),
-        (PF_FILE, "source_blank_image", "Background image to use that should have previously had the text removed", None),
+        (PF_FILE, "objective_name",
+         "Name of the objective. There must be a utf-8 encoded text file of "
+         "this name.",
+         None),
+        (PF_FILE, "source_blank_image",
+         "Background image to use that should have previously had the text "
+         "removed",
+         None),
         (PF_STRING, "output_basename", "Base output filename", None),
     ],
     [],
@@ -103,8 +122,14 @@ register(
     "<Toolbox>/_Miasmata/Objective _page",
     None,
     [
-        (PF_FILE, "source_txt_file", "utf-8 encoded text file with the translation of Primary Objective: and Secondary Objective: on each line", None),
-        (PF_FILE, "source_blank_image", "Background image to use that should have previously had the text removed", None),
+        (PF_FILE, "source_txt_file",
+         "utf-8 encoded text file with the translation of Primary Objective: "
+         "and Secondary Objective: on each line",
+         None),
+        (PF_FILE, "source_blank_image",
+         "Background image to use that should have previously had the text "
+         "removed",
+         None),
         (PF_STRING, "output_basename", "Base output filename", None),
     ],
     [],
@@ -121,8 +146,12 @@ register(
     "<Toolbox>/_Miasmata/Ob_jective note",
     None,
     [
-        (PF_FILE, "source_txt_file", "utf-8 encoded text file with the objective note", None),
-        (PF_FILE, "source_blank_image", "Background image to use that should have previously had the text removed", None),
+        (PF_FILE, "source_txt_file",
+         "utf-8 encoded text file with the objective note", None),
+        (PF_FILE, "source_blank_image",
+         "Background image to use that should have previously had the text "
+         "removed",
+         None),
         (PF_STRING, "output_basename", "Base output filename", None),
     ],
     [],

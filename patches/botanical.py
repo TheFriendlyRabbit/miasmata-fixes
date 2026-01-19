@@ -1,32 +1,40 @@
 #!/usr/bin/env python
 
-# Fix print function for Python 2 deficiency regarding non-ascii encoded text files:
-from __future__ import print_function
-import utf8file
-print = utf8file.print
-
-from PySide import QtGui
-from mmap import *
 import os
+from mmap import ACCESS_WRITE, ACCESS_READ, mmap
 
-name = QtGui.QApplication.translate('Botanical Bad A** fix', 'Botanical Bad A** fix', None, QtGui.QApplication.UnicodeUTF8)
-txt_scanning = QtGui.QApplication.translate('Botanical Bad A** fix', 'Scanning Miasmata.exe...', None, QtGui.QApplication.UnicodeUTF8)
-txt_already_patched = QtGui.QApplication.translate('Botanical Bad A** fix', 'The game is already patched', None, QtGui.QApplication.UnicodeUTF8)
-txt_no_bug = QtGui.QApplication.translate('Botanical Bad A** fix', 'Unable to locate bug', None, QtGui.QApplication.UnicodeUTF8)
-txt_success = QtGui.QApplication.translate('Botanical Bad A** fix', 'Patch successful', None, QtGui.QApplication.UnicodeUTF8)
-txt_err = QtGui.QApplication.translate('Botanical Bad A** fix', 'Error writing to Miasmata.exe', None, QtGui.QApplication.UnicodeUTF8)
+from PySide6.QtWidgets import QApplication
+
+name = QApplication.translate('Botanical Bad A** fix', 'Botanical Bad A** fix',
+                              None)
+txt_scanning = QApplication.translate('Botanical Bad A** fix',
+                                      'Scanning Miasmata.exe...', None)
+txt_already_patched = QApplication.translate('Botanical Bad A** fix',
+                                             'The game is already patched',
+                                             None)
+txt_no_bug = QApplication.translate('Botanical Bad A** fix',
+                                    'Unable to locate bug', None)
+txt_success = QApplication.translate('Botanical Bad A** fix',
+                                     'Patch successful', None)
+txt_err = QApplication.translate('Botanical Bad A** fix',
+                                 'Error writing to Miasmata.exe', None)
 
 version = '1.0'
 
-class PatchFailed(Exception): pass
 
-patch = ('plant\0\0\0', 'plants\0\0')
+class PatchFailed(Exception):
+    pass
 
-def _apply_patch(filename, print=print, (patch_from, patch_to) = patch):
+
+patch = (b'plant\0\0\0', b'plants\0\0')
+
+
+def _apply_patch(filename, print=print, xxx_todo_changeme=patch):
+    (patch_from, patch_to) = xxx_todo_changeme
     with open(filename, 'rb+') as f:
         m = mmap(f.fileno(), 0, access=ACCESS_WRITE)
         print(txt_scanning)
-        journal_allnotes = m.find('journal_allnotes')
+        journal_allnotes = m.find(b'journal_allnotes')
         if journal_allnotes < 8:
             print(txt_no_bug)
             raise PatchFailed()
@@ -48,18 +56,21 @@ def _apply_patch(filename, print=print, (patch_from, patch_to) = patch):
         raise PatchFailed()
     print(txt_success)
 
+
 def apply_patch(filename, print=print):
     return _apply_patch(filename, print)
 
+
 def remove_patch(filename, print=print):
     return _apply_patch(filename, print, reversed(patch))
+
 
 def check_status(filename):
     import miaspatch
 
     with open(filename, 'rb') as f:
         m = mmap(f.fileno(), 0, access=ACCESS_READ)
-        journal_allnotes = m.find('journal_allnotes')
+        journal_allnotes = m.find(b'journal_allnotes')
         if journal_allnotes < 8:
             m.close()
             return miaspatch.STATUS_NOT_INSTALLABLE
@@ -71,7 +82,9 @@ def check_status(filename):
             return miaspatch.STATUS_INSTALLED
         return miaspatch.STATUS_NOT_INSTALLABLE
 
+
 if __name__ == '__main__':
     import sys
+
     filename = sys.argv[1]
     apply_patch(filename)

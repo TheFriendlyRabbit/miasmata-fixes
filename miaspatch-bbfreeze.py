@@ -1,9 +1,19 @@
 #!/usr/bin/env python
 
-import shutil, sys, os
+import os
+import shutil
+import sys
+from shutil import copyfile
+from site import getsitepackages
+from os import mkdir
+
+from miasutil import is_windows
+
 extractor = __import__('rs5-extractor')
-import ConfigParser
+import configparser
 import argparse
+
+import miasutil
 
 binary_patches = ['botanical', '4gb']
 delete = ['communitypatch.rs5']
@@ -11,45 +21,53 @@ copy_language_src = False
 order = ['communitypatch']
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-l', '--language', help='Language pack to include and enable')
-parser.add_argument('-x', '--exe-translation', help='Translations for hard coded strings to binary patch')
-parser.add_argument('-d', '--dest', '--dist', default='miaspatch', help='Destination directory')
-parser.add_argument('mods', nargs='*', help='Extra mods (asside from the community patch) to include')
+parser.add_argument('-l', '--language',
+                    help='Language pack to include and enable')
+parser.add_argument('-x', '--exe-translation',
+                    help='Translations for hard coded strings to binary patch')
+parser.add_argument('-d', '--dest', '--dist', default='miaspatch',
+                    help='Destination directory')
+parser.add_argument('mods', nargs='*',
+                    help='Extra mods (asside from the community patch) to '
+                         'include')
 args = parser.parse_args()
 
 if args.language is not None:
-	if not os.path.isfile(os.path.join('miaspatch_i18n', '%s.ts' % args.language)):
-		if not os.path.isfile(os.path.join('miaspatch_i18n', '%s.qm' % args.language)):
-			print '%s language pack does not exist, exiting!' % args.language
-			sys.exit(1)
+    if not os.path.isfile(
+            os.path.join('miaspatch_i18n', f'{args.language}.ts')):
+        if not os.path.isfile(
+                os.path.join('miaspatch_i18n', f'{args.language}.qm')):
+            print(f'{args.language} language pack does not exist, exiting!')
+            sys.exit(1)
 
 if args.exe_translation is not None:
-	binary_patches.append('translate_exe')
-	args.mods.append(args.exe_translation)
+    binary_patches.append('translate_exe')
+    args.mods.append(args.exe_translation)
 
 for file in args.mods:
-	if not os.path.isfile(file):
-		print '%s does not exist, exiting!' % file
-		sys.exit(1)
-	(name, ext) = os.path.splitext(os.path.basename(file))
-	if ext.lower() == '.rs5mod':
-		order.append(name)
-print 'Mod order:', order
+    if not os.path.isfile(file):
+        print(f'{file} does not exist, exiting!')
+        sys.exit(1)
+    (name, ext) = os.path.splitext(os.path.basename(file))
+    if ext.lower() == '.rs5mod':
+        order.append(name)
+print('Mod order:', order)
 
-from bbfreeze import Freezer
-from shutil import copyfile
-from site import getsitepackages
-from os import mkdir
-f = Freezer(args.dest)
-f.setIcon("miasmod.ico")
-f.include_py = False
-f.addScript("miaspatch.py", gui_only=True)
-for patch in binary_patches:
-	f.addModule(patch)
-f()
-mkdir("./miaspatch/imageformats")
+# f = Freezer(args.dest)
+# f.setIcon("miasmod.ico")
+# f.include_py = False
+# f.addScript("miaspatch.py", gui_only=True)
+# for patch in binary_patches:
+#    f.addModule(patch)
+# f()
+if not os.path.isdir("./miaspatch/imageformats"):
+    os.makedirs("./miaspatch/imageformats")
 copyfile("./miasmod.ico", "./miaspatch/imageformats/miasmod.ico")
-copyfile(getsitepackages()[1] + "\\PySide\\plugins\\imageformats\\qico4.dll", "./miaspatch/imageformats/qico4.dll")
+
+if (is_windows()):
+    copyfile(
+        getsitepackages()[1] + "\\PySide\\plugins\\imageformats\\qico4.dll",
+        "./miaspatch/imageformats/qico4.dll")
 
 src = os.path.join('communitypatch', 'communitypatch.miasmod')
 dst = os.path.join(args.dest, 'communitypatch.miasmod')
@@ -60,36 +78,37 @@ dst = os.path.join(args.dest, 'communitypatch.rs5mod')
 extractor.create_rs5(dst, [src], True)
 
 for file in args.mods:
-	dst = os.path.join(args.dest, os.path.basename(file))
-	shutil.copyfile(file, dst)
+    dst = os.path.join(args.dest, os.path.basename(file))
+    shutil.copyfile(file, dst)
 
 if args.language is not None:
-	dst_dir = os.path.join(args.dest, 'miaspatch_i18n')
-	if not os.path.isdir(dst_dir):
-		os.mkdir(dst_dir)
-	if copy_language_src:
-		src = os.path.join('miaspatch_i18n', '%s.ts' % args.language)
-		dst = os.path.join(dst_dir, '%s.ts' % args.language)
-		if os.path.isfile(src):
-			shutil.copyfile(src, dst)
-	src = os.path.join('miaspatch_i18n', '%s.qm' % args.language)
-	dst = os.path.join(dst_dir, '%s.qm' % args.language)
-	if os.path.isfile(src):
-		shutil.copyfile(src, dst)
+    dst_dir = os.path.join(args.dest, 'miaspatch_i18n')
+    if not os.path.isdir(dst_dir):
+        os.mkdir(dst_dir)
+    if copy_language_src:
+        src = os.path.join('miaspatch_i18n', f'{args.language}.ts')
+        dst = os.path.join(dst_dir, f'{args.language}.ts')
+        if os.path.isfile(src):
+            shutil.copyfile(src, dst)
+    src = os.path.join('miaspatch_i18n', f'{args.language}.qm')
+    dst = os.path.join(dst_dir, f'{args.language}.qm')
+    if os.path.isfile(src):
+        shutil.copyfile(src, dst)
 
 dst = os.path.join(args.dest, 'miaspatch.cfg')
-config = ConfigParser.RawConfigParser()
+config = configparser.RawConfigParser()
 if binary_patches:
-	config.set('DEFAULT', 'binary_patches', ' '.join(binary_patches))
+    config.set('DEFAULT', 'binary_patches', ' '.join(binary_patches))
 if delete:
-	config.set('DEFAULT', 'delete', ' '.join(delete))
+    config.set('DEFAULT', 'delete', ' '.join(delete))
 if args.language is not None:
-	config.set('DEFAULT', 'language', args.language)
+    config.set('DEFAULT', 'language', args.language)
 if args.exe_translation:
-	config.set('DEFAULT', 'exe_translation', os.path.basename(args.exe_translation))
+    config.set('DEFAULT', 'exe_translation',
+               os.path.basename(args.exe_translation))
 if order:
-	config.set('DEFAULT', 'prefix_order', ' '.join(order))
-with open(dst, 'wb') as configfile:
+    config.set('DEFAULT', 'prefix_order', ' '.join(order))
+with open(dst, 'w') as configfile:
     config.write(configfile)
 
 # vi:noexpandtab:sw=8:ts=8

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from gimpfu import *
+
 from miasmata_gimp import *
 
 font_l = Font('Neu Phollick Alpha', 42.0, True)
@@ -12,7 +13,9 @@ lx, rx = 491, 526
 # Minimum allowed x (for page conditions heading):
 min_x = 278
 
-def compose_condition_page(source_txt_file, source_blank_image, output_basename):
+
+def compose_condition_page(source_txt_file, source_blank_image,
+                           output_basename):
     image = pdb.gimp_file_load(source_blank_image, source_blank_image)
     layer = add_text_layer_from_file(image, source_txt_file, font_l)
     reduce_text_to_fit(layer, min_x, lx)
@@ -20,7 +23,9 @@ def compose_condition_page(source_txt_file, source_blank_image, output_basename)
 
     save(image, output_basename)
 
-def compose_condition_split(source_txt_file, source_blank_image, output_basename):
+
+def compose_condition_split(source_txt_file, source_blank_image,
+                            output_basename):
     if 'Primary' in source_txt_file:
         y = 13
         font = font_l
@@ -29,7 +34,8 @@ def compose_condition_split(source_txt_file, source_blank_image, output_basename
         font = font_s
 
     image = pdb.gimp_file_load(source_blank_image, source_blank_image)
-    (left, right) = map(unicode.strip, read_text(source_txt_file).split(':', 1))
+    (left, right) = list(
+        map(str.strip, read_text(source_txt_file).split(':', 1)))
     left = '%s:' % left
 
     layer = add_text(image, left, font)
@@ -41,7 +47,9 @@ def compose_condition_split(source_txt_file, source_blank_image, output_basename
 
     save(image, output_basename)
 
-def compose_condition_active(source_txt_file, source_blank_image, output_basename):
+
+def compose_condition_active(source_txt_file, source_blank_image,
+                             output_basename):
     colour = (128, 0, 0)
     if 'ClarityTonic' in source_txt_file:
         colour = (0, 128, 0)
@@ -55,7 +63,9 @@ def compose_condition_active(source_txt_file, source_blank_image, output_basenam
 
     save(image, output_basename)
 
-def compose_condition_small(source_txt_file, source_blank_image, output_basename):
+
+def compose_condition_small(source_txt_file, source_blank_image,
+                            output_basename):
     colour = (0, 128, 0)
 
     image = pdb.gimp_file_load(source_blank_image, source_blank_image)
@@ -64,6 +74,7 @@ def compose_condition_small(source_txt_file, source_blank_image, output_basename
     place_text(layer, 48, 25, xalign=CENTER, yalign=CENTER)
 
     save(image, output_basename)
+
 
 register(
     "miasmata_condition_page",
@@ -75,8 +86,12 @@ register(
     "<Toolbox>/_Miasmata/&Condition page",
     None,
     [
-        (PF_FILE, "source_txt_file", "utf-8 encoded text file with the translation of 'Abilities:'", None),
-        (PF_FILE, "source_blank_image", "Background image to use that should have previously had the text removed", None),
+        (PF_FILE, "source_txt_file",
+         "utf-8 encoded text file with the translation of 'Abilities:'", None),
+        (PF_FILE, "source_blank_image",
+         "Background image to use that should have previously had the text "
+         "removed",
+         None),
         (PF_STRING, "output_basename", "Base output filename", None),
     ],
     [],
@@ -94,7 +109,10 @@ register(
     None,
     [
         (PF_FILE, "source_txt_file", "utf-8 encoded text file", None),
-        (PF_FILE, "source_blank_image", "Background image to use that should have previously had the text removed", None),
+        (PF_FILE, "source_blank_image",
+         "Background image to use that should have previously had the text "
+         "removed",
+         None),
         (PF_STRING, "output_basename", "Base output filename", None),
     ],
     [],
@@ -112,7 +130,10 @@ register(
     None,
     [
         (PF_FILE, "source_txt_file", "utf-8 encoded text file", None),
-        (PF_FILE, "source_blank_image", "Background image to use that should have previously had the text removed", None),
+        (PF_FILE, "source_blank_image",
+         "Background image to use that should have previously had the text "
+         "removed",
+         None),
         (PF_STRING, "output_basename", "Base output filename", None),
     ],
     [],
@@ -130,7 +151,10 @@ register(
     None,
     [
         (PF_FILE, "source_txt_file", "utf-8 encoded text file", None),
-        (PF_FILE, "source_blank_image", "Background image to use that should have previously had the text removed", None),
+        (PF_FILE, "source_blank_image",
+         "Background image to use that should have previously had the text "
+         "removed",
+         None),
         (PF_STRING, "output_basename", "Base output filename", None),
     ],
     [],

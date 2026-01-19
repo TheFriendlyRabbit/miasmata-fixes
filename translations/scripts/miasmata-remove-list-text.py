@@ -2,6 +2,7 @@
 
 from gimpfu import *
 
+
 def remove_journal_list_text(source_file, placeholder_file, output_file):
     image = pdb.gimp_file_load(placeholder_file, placeholder_file)
 
@@ -36,16 +37,17 @@ def remove_journal_list_text(source_file, placeholder_file, output_file):
     # pdb.gimp_layer_add_alpha(image2.active_layer)
 
     pdb.file_png_save2(image2, image2.active_layer, output_file, output_file,
-            0, # interlace
-            9, # compression
-            0, # save background colour
-            0, # save gamma
-            0, # save layer offset
-            1, # save pHYs (resolution?)
-            1, # save creation time
-            1, # save comment
-            1, # preserve colour of transparent pixels
-    )
+                       0,  # interlace
+                       9,  # compression
+                       0,  # save background colour
+                       0,  # save gamma
+                       0,  # save layer offset
+                       1,  # save pHYs (resolution?)
+                       1,  # save creation time
+                       1,  # save comment
+                       1,  # preserve colour of transparent pixels
+                       )
+
 
 register(
     "miasmata_remove_list_text",
@@ -58,7 +60,8 @@ register(
     None,
     [
         (PF_FILE, "source_file", "Journal Index Image", None),
-        (PF_FILE, "placeholder_file", "List Placeholder", "LIST_Placeholder1.png"),
+        (PF_FILE, "placeholder_file", "List Placeholder",
+         "LIST_Placeholder1.png"),
         (PF_STRING, "output_file", "Output File", None),
     ],
     [],

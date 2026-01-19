@@ -5,13 +5,15 @@ from gimpfu import *
 from miasmata_gimp import *
 
 intro_font = Font('Norlik', 36.0, False, 15.0)
-end_font = Font('Norlik Condensed', 36.0, False, 20.0) #, letter_spacing = -1.0)
+end_font = Font('Norlik Condensed', 36.0, False,
+                20.0)  # , letter_spacing = -1.0)
 end_title_font = Font('Norlik Condensed', 50.0)
 
 width = height = 1024
 
 header_y = 465
 min_width = 500
+
 
 def enlarge_first_letter(text, txt):
     # XXX: Requires a patched GIMP to set text markup
@@ -20,15 +22,18 @@ def enlarge_first_letter(text, txt):
     pdb.gimp_text_layer_set_markup(text, markup)
     return markup
 
-def scale_layer(image, layer, x = 1.0, y = 1.0):
+
+def scale_layer(image, layer, x=1.0, y=1.0):
     try:
         pdb.gimp_context_set_interpolation(INTERPOLATION_LANCZOS)
     except:
         pdb.gimp_context_set_interpolation(INTERPOLATION_NOHALO)
     layer.scale(int(layer.width * x), int(layer.height * y))
 
+
 def add_background(image, opacity=100.0):
-    background = gimp.Layer(image, 'Background', width, height, RGB_IMAGE, opacity, NORMAL_MODE)
+    background = gimp.Layer(image, 'Background', width, height, RGB_IMAGE,
+                            opacity, NORMAL_MODE)
     image.add_layer(background, -1)
 
     gimp.set_background(0, 0, 0)
@@ -36,11 +41,13 @@ def add_background(image, opacity=100.0):
 
     return background
 
+
 def display_image(image):
     try:
         gimp.Display(image)
     except:
         pass
+
 
 def render_end_slide(source_txt_file, output_basename, first=False):
     txt = read_text(source_txt_file)
@@ -48,7 +55,7 @@ def render_end_slide(source_txt_file, output_basename, first=False):
     image = gimp.Image(width, height, RGB)
     background = add_background(image)
     display_image(image)
-    layer = add_text(image, txt, end_font, colour = (255, 255, 255))
+    layer = add_text(image, txt, end_font, colour=(255, 255, 255))
     if first:
         txt = enlarge_first_letter(layer, txt)
     word_wrap(layer, txt, width - 250)
@@ -58,6 +65,7 @@ def render_end_slide(source_txt_file, output_basename, first=False):
 
     save(image, output_basename)
 
+
 def render_end_slide_credits(source_txt_file, output_basename):
     (category, details, name) = read_text(source_txt_file).split('\n')
 
@@ -65,9 +73,9 @@ def render_end_slide_credits(source_txt_file, output_basename):
     background = add_background(image)
     display_image(image)
 
-    details_layer = add_text(image, details, end_font, colour = (255, 255, 255))
+    details_layer = add_text(image, details, end_font, colour=(255, 255, 255))
     scale_layer(image, details_layer, 0.9, 1.1)
-    place_text(details_layer, width/2, header_y, xalign=CENTER)
+    place_text(details_layer, width / 2, header_y, xalign=CENTER)
     blur_layer(image, details_layer)
 
     if details_layer.width >= min_width:
@@ -78,20 +86,23 @@ def render_end_slide_credits(source_txt_file, output_basename):
         x2 = x1 + min_width
         details_layer.set_offsets(x1, details_layer.offsets[1])
 
-    layer = add_text(image, category, end_title_font, colour = (255, 255, 255))
+    layer = add_text(image, category, end_title_font, colour=(255, 255, 255))
     scale_layer(image, layer, 0.9, 1.1)
     place_text(layer, x1, header_y, yalign=BOTTOM)
     blur_layer(image, layer)
-    print '--- %i : %i ---' % (layer.offsets[1], layer.offsets[1] + layer.height)
+    print(
+        '--- %i : %i ---' % (layer.offsets[1], layer.offsets[1] + layer.height))
 
-    layer = add_text(image, name, end_font, colour = (255, 255, 255))
+    layer = add_text(image, name, end_font, colour=(255, 255, 255))
     scale_layer(image, layer, 0.9, 1.1)
     place_text(layer, x2, 600, xalign=RIGHT)
     blur_layer(image, layer)
 
     save(image, output_basename)
 
-def render_end_slide_thanks(source_txt_file, output_basename, source_blank_image):
+
+def render_end_slide_thanks(source_txt_file, output_basename,
+                            source_blank_image):
     txt = read_text(source_txt_file)
     try:
         (header, name) = txt.split('\n', 1)
@@ -105,18 +116,19 @@ def render_end_slide_thanks(source_txt_file, output_basename, source_blank_image
         background = add_background(image)
         display_image(image)
 
-    layer = add_text(image, header, end_title_font, colour = (255, 255, 255))
+    layer = add_text(image, header, end_title_font, colour=(255, 255, 255))
     scale_layer(image, layer, 0.9, 1.1)
-    place_text(layer, width/2, header_y, xalign=CENTER, yalign=BOTTOM)
+    place_text(layer, width / 2, header_y, xalign=CENTER, yalign=BOTTOM)
     blur_layer(image, layer)
 
     if name:
-        layer = add_text(image, name, end_font, colour = (255, 255, 255))
+        layer = add_text(image, name, end_font, colour=(255, 255, 255))
         scale_layer(image, layer, 0.9, 1.1)
-        place_text(layer, image.width/2, 550, xalign=CENTER)
+        place_text(layer, image.width / 2, 550, xalign=CENTER)
         blur_layer(image, layer)
 
     save(image, output_basename)
+
 
 def render_intro_slide(source_txt_file, output_basename):
     txt = open(source_txt_file, 'rb').read().decode('utf-8').strip()
@@ -124,7 +136,7 @@ def render_intro_slide(source_txt_file, output_basename):
     image = gimp.Image(width, height, RGB)
     background = add_background(image, 0.0)
     display_image(image)
-    text = add_text(image, txt, intro_font, colour = (255, 255, 255))
+    text = add_text(image, txt, intro_font, colour=(255, 255, 255))
     pdb.gimp_text_layer_set_justification(text, TEXT_JUSTIFY_CENTER)
     center_layer(text)
     blur_layer(image, text)
@@ -133,6 +145,7 @@ def render_intro_slide(source_txt_file, output_basename):
     background.opacity = 100.0
     image.flatten()
     save_jpg(image, '%s.jpg' % output_basename)
+
 
 register(
     "miasmata_end_slide",
@@ -144,9 +157,11 @@ register(
     "<Toolbox>/_Miasmata/_End",
     None,
     [
-        (PF_FILE, "source_txt_file", "utf-8 encoded file with the text to place on the slide", None),
+        (PF_FILE, "source_txt_file",
+         "utf-8 encoded file with the text to place on the slide", None),
         (PF_STRING, "output_basename", "Base output filename", None),
-        (PF_BOOL, "first", "First slide - causes first letter to be enlarged slightly", None),
+        (PF_BOOL, "first",
+         "First slide - causes first letter to be enlarged slightly", None),
     ],
     [],
     render_end_slide,
@@ -161,7 +176,8 @@ register(
     "<Toolbox>/_Miasmata/_End Credits",
     None,
     [
-        (PF_FILE, "source_txt_file", "utf-8 encoded file with the text to place on the slide", None),
+        (PF_FILE, "source_txt_file",
+         "utf-8 encoded file with the text to place on the slide", None),
         (PF_STRING, "output_basename", "Base output filename", None),
     ],
     [],
@@ -177,9 +193,13 @@ register(
     "<Toolbox>/_Miasmata/_End Thanks",
     None,
     [
-        (PF_FILE, "source_txt_file", "utf-8 encoded file with the text to place on the slide", None),
+        (PF_FILE, "source_txt_file",
+         "utf-8 encoded file with the text to place on the slide", None),
         (PF_STRING, "output_basename", "Base output filename", None),
-        (PF_FILE, "source_blank_image", "Optional background image with the text removed. If not specified a solid black background will be used", None),
+        (PF_FILE, "source_blank_image",
+         "Optional background image with the text removed. If not specified a "
+         "solid black background will be used",
+         None),
     ],
     [],
     render_end_slide_thanks,
@@ -195,7 +215,8 @@ register(
     "<Toolbox>/_Miasmata/_Intro",
     None,
     [
-        (PF_FILE, "source_txt_file", "utf-8 encoded file with the text to place on the slide", None),
+        (PF_FILE, "source_txt_file",
+         "utf-8 encoded file with the text to place on the slide", None),
         (PF_STRING, "output_basename", "Base output filename", None),
     ],
     [],

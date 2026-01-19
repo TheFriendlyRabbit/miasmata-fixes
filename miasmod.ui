@@ -1,270 +1,270 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>935</width>
-    <height>621</height>
-   </rect>
-  </property>
-  <property name="windowTitle">
-   <string>Miasmod - Miasmata Advanced Configuration and Modding Tool</string>
-  </property>
-  <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_3">
-    <item>
-     <widget class="QTabWidget" name="tabWidget">
-      <property name="currentIndex">
-       <number>0</number>
-      </property>
-      <property name="tabsClosable">
-       <bool>true</bool>
-      </property>
-      <widget class="QWidget" name="mods_tab">
-       <attribute name="title">
-        <string>Mod List</string>
-       </attribute>
-       <layout class="QGridLayout" name="gridLayout_2">
-        <item row="2" column="1">
-         <widget class="QTableView" name="rs5_mod_list">
-          <property name="contextMenuPolicy">
-           <enum>Qt::CustomContextMenu</enum>
-          </property>
-          <property name="alternatingRowColors">
-           <bool>true</bool>
-          </property>
-          <property name="selectionMode">
-           <enum>QAbstractItemView::SingleSelection</enum>
-          </property>
-          <property name="selectionBehavior">
-           <enum>QAbstractItemView::SelectRows</enum>
-          </property>
-          <property name="showGrid">
-           <bool>false</bool>
-          </property>
-          <attribute name="verticalHeaderVisible">
-           <bool>false</bool>
-          </attribute>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <layout class="QVBoxLayout" name="verticalLayout">
-          <item>
-           <widget class="QPushButton" name="open_environment">
+    <class>MainWindow</class>
+    <widget class="QMainWindow" name="MainWindow">
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>935</width>
+                <height>621</height>
+            </rect>
+        </property>
+        <property name="windowTitle">
+            <string>Miasmod - Miasmata Advanced Configuration and Modding Tool</string>
+        </property>
+        <widget class="QWidget" name="centralwidget">
+            <layout class="QVBoxLayout" name="verticalLayout_3">
+                <item>
+                    <widget class="QTabWidget" name="tabWidget">
+                        <property name="currentIndex">
+                            <number>0</number>
+                        </property>
+                        <property name="tabsClosable">
+                            <bool>true</bool>
+                        </property>
+                        <widget class="QWidget" name="mods_tab">
+                            <attribute name="title">
+                                <string>Mod List</string>
+                            </attribute>
+                            <layout class="QGridLayout" name="gridLayout_2">
+                                <item row="2" column="1">
+                                    <widget class="QTableView" name="rs5_mod_list">
+                                        <property name="contextMenuPolicy">
+                                            <enum>Qt::CustomContextMenu</enum>
+                                        </property>
+                                        <property name="alternatingRowColors">
+                                            <bool>true</bool>
+                                        </property>
+                                        <property name="selectionMode">
+                                            <enum>QAbstractItemView::SingleSelection</enum>
+                                        </property>
+                                        <property name="selectionBehavior">
+                                            <enum>QAbstractItemView::SelectRows</enum>
+                                        </property>
+                                        <property name="showGrid">
+                                            <bool>false</bool>
+                                        </property>
+                                        <attribute name="verticalHeaderVisible">
+                                            <bool>false</bool>
+                                        </attribute>
+                                    </widget>
+                                </item>
+                                <item row="0" column="0">
+                                    <layout class="QVBoxLayout" name="verticalLayout">
+                                        <item>
+                                            <widget class="QPushButton" name="open_environment">
+                                                <property name="text">
+                                                    <string>Open local &amp;environment...</string>
+                                                </property>
+                                            </widget>
+                                        </item>
+                                        <item>
+                                            <widget class="QPushButton" name="new_mod">
+                                                <property name="text">
+                                                    <string>&amp;New Mod...</string>
+                                                </property>
+                                            </widget>
+                                        </item>
+                                        <item>
+                                            <widget class="QPushButton" name="open_saves_dat">
+                                                <property name="text">
+                                                    <string>Open &amp;saves.dat...</string>
+                                                </property>
+                                            </widget>
+                                        </item>
+                                        <item>
+                                            <widget class="QPushButton" name="refresh_mod_list">
+                                                <property name="text">
+                                                    <string>&amp;Refresh Mod List</string>
+                                                </property>
+                                            </widget>
+                                        </item>
+                                        <item>
+                                            <widget class="QPushButton" name="synchronise_local_mod">
+                                                <property name="text">
+                                                    <string>S&amp;ynchronise alocalmod.rs5</string>
+                                                </property>
+                                            </widget>
+                                        </item>
+                                        <item>
+                                            <spacer name="verticalSpacer">
+                                                <property name="orientation">
+                                                    <enum>Qt::Vertical</enum>
+                                                </property>
+                                                <property name="sizeHint" stdset="0">
+                                                    <size>
+                                                        <width>20</width>
+                                                        <height>40</height>
+                                                    </size>
+                                                </property>
+                                            </spacer>
+                                        </item>
+                                    </layout>
+                                </item>
+                                <item row="0" column="1">
+                                    <widget class="QTableView" name="mod_list">
+                                        <property name="alternatingRowColors">
+                                            <bool>true</bool>
+                                        </property>
+                                        <property name="selectionMode">
+                                            <enum>QAbstractItemView::SingleSelection</enum>
+                                        </property>
+                                        <property name="selectionBehavior">
+                                            <enum>QAbstractItemView::SelectRows</enum>
+                                        </property>
+                                        <property name="showGrid">
+                                            <bool>false</bool>
+                                        </property>
+                                        <attribute name="verticalHeaderVisible">
+                                            <bool>false</bool>
+                                        </attribute>
+                                    </widget>
+                                </item>
+                                <item row="2" column="0">
+                                    <layout class="QVBoxLayout" name="verticalLayout_4">
+                                        <item>
+                                            <widget class="QPushButton" name="install_rs5mod">
+                                                <property name="text">
+                                                    <string>&amp;Install main.rs5 mod...</string>
+                                                </property>
+                                            </widget>
+                                        </item>
+                                        <item>
+                                            <widget class="QPushButton" name="revert_main_rs5">
+                                                <property name="text">
+                                                    <string>Restore original main.rs5</string>
+                                                </property>
+                                            </widget>
+                                        </item>
+                                        <item>
+                                            <spacer name="verticalSpacer_2">
+                                                <property name="orientation">
+                                                    <enum>Qt::Vertical</enum>
+                                                </property>
+                                                <property name="sizeHint" stdset="0">
+                                                    <size>
+                                                        <width>20</width>
+                                                        <height>40</height>
+                                                    </size>
+                                                </property>
+                                            </spacer>
+                                        </item>
+                                    </layout>
+                                </item>
+                                <item row="1" column="1">
+                                    <widget class="Line" name="line">
+                                        <property name="orientation">
+                                            <enum>Qt::Horizontal</enum>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="1" column="0">
+                                    <widget class="Line" name="line_2">
+                                        <property name="orientation">
+                                            <enum>Qt::Horizontal</enum>
+                                        </property>
+                                    </widget>
+                                </item>
+                            </layout>
+                        </widget>
+                    </widget>
+                </item>
+            </layout>
+        </widget>
+        <widget class="QMenuBar" name="menubar">
+            <property name="geometry">
+                <rect>
+                    <x>0</x>
+                    <y>0</y>
+                    <width>935</width>
+                    <height>19</height>
+                </rect>
+            </property>
+        </widget>
+        <widget class="QStatusBar" name="statusbar"/>
+        <action name="action_Remove_Mod">
             <property name="text">
-             <string>Open local &amp;environment...</string>
+                <string>&amp;Remove Mod</string>
             </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="new_mod">
+        </action>
+        <action name="actionSet_Lowest_Priority">
             <property name="text">
-             <string>&amp;New Mod...</string>
+                <string>Set &amp;Lowest Priority</string>
             </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="open_saves_dat">
+        </action>
+        <action name="actionSet_Highest_Priority">
             <property name="text">
-             <string>Open &amp;saves.dat...</string>
+                <string>Set &amp;Highest Priority</string>
             </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="refresh_mod_list">
-            <property name="text">
-             <string>&amp;Refresh Mod List</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="synchronise_local_mod">
-            <property name="text">
-             <string>S&amp;ynchronise alocalmod.rs5</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="verticalSpacer">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </item>
-        <item row="0" column="1">
-         <widget class="QTableView" name="mod_list">
-          <property name="alternatingRowColors">
-           <bool>true</bool>
-          </property>
-          <property name="selectionMode">
-           <enum>QAbstractItemView::SingleSelection</enum>
-          </property>
-          <property name="selectionBehavior">
-           <enum>QAbstractItemView::SelectRows</enum>
-          </property>
-          <property name="showGrid">
-           <bool>false</bool>
-          </property>
-          <attribute name="verticalHeaderVisible">
-           <bool>false</bool>
-          </attribute>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <layout class="QVBoxLayout" name="verticalLayout_4">
-          <item>
-           <widget class="QPushButton" name="install_rs5mod">
-            <property name="text">
-             <string>&amp;Install main.rs5 mod...</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="revert_main_rs5">
-            <property name="text">
-             <string>Restore original main.rs5</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="verticalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </item>
-        <item row="1" column="1">
-         <widget class="Line" name="line">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="Line" name="line_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </widget>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>935</width>
-     <height>19</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QStatusBar" name="statusbar"/>
-  <action name="action_Remove_Mod">
-   <property name="text">
-    <string>&amp;Remove Mod</string>
-   </property>
-  </action>
-  <action name="actionSet_Lowest_Priority">
-   <property name="text">
-    <string>Set &amp;Lowest Priority</string>
-   </property>
-  </action>
-  <action name="actionSet_Highest_Priority">
-   <property name="text">
-    <string>Set &amp;Highest Priority</string>
-   </property>
-  </action>
- </widget>
- <tabstops>
-  <tabstop>tabWidget</tabstop>
-  <tabstop>open_environment</tabstop>
-  <tabstop>new_mod</tabstop>
-  <tabstop>open_saves_dat</tabstop>
-  <tabstop>refresh_mod_list</tabstop>
-  <tabstop>synchronise_local_mod</tabstop>
-  <tabstop>mod_list</tabstop>
-  <tabstop>install_rs5mod</tabstop>
-  <tabstop>revert_main_rs5</tabstop>
-  <tabstop>rs5_mod_list</tabstop>
- </tabstops>
- <resources/>
- <connections>
-  <connection>
-   <sender>refresh_mod_list</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>refresh_mod_list()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>49</x>
-     <y>210</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>6</x>
-     <y>397</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>open_environment</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>open_alocalmod()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>58</x>
-     <y>88</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>8</x>
-     <y>142</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>synchronise_local_mod</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>synchronise_alocalmod()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>144</x>
-     <y>226</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>4</x>
-     <y>270</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
- <slots>
-  <slot>open_alocalmod()</slot>
-  <slot>refresh_mod_list()</slot>
-  <slot>synchronise_alocalmod()</slot>
- </slots>
+        </action>
+    </widget>
+    <tabstops>
+        <tabstop>tabWidget</tabstop>
+        <tabstop>open_environment</tabstop>
+        <tabstop>new_mod</tabstop>
+        <tabstop>open_saves_dat</tabstop>
+        <tabstop>refresh_mod_list</tabstop>
+        <tabstop>synchronise_local_mod</tabstop>
+        <tabstop>mod_list</tabstop>
+        <tabstop>install_rs5mod</tabstop>
+        <tabstop>revert_main_rs5</tabstop>
+        <tabstop>rs5_mod_list</tabstop>
+    </tabstops>
+    <resources/>
+    <connections>
+        <connection>
+            <sender>refresh_mod_list</sender>
+            <signal>clicked()</signal>
+            <receiver>MainWindow</receiver>
+            <slot>refresh_mod_list()</slot>
+            <hints>
+                <hint type="sourcelabel">
+                    <x>49</x>
+                    <y>210</y>
+                </hint>
+                <hint type="destinationlabel">
+                    <x>6</x>
+                    <y>397</y>
+                </hint>
+            </hints>
+        </connection>
+        <connection>
+            <sender>open_environment</sender>
+            <signal>clicked()</signal>
+            <receiver>MainWindow</receiver>
+            <slot>open_alocalmod()</slot>
+            <hints>
+                <hint type="sourcelabel">
+                    <x>58</x>
+                    <y>88</y>
+                </hint>
+                <hint type="destinationlabel">
+                    <x>8</x>
+                    <y>142</y>
+                </hint>
+            </hints>
+        </connection>
+        <connection>
+            <sender>synchronise_local_mod</sender>
+            <signal>clicked()</signal>
+            <receiver>MainWindow</receiver>
+            <slot>synchronise_alocalmod()</slot>
+            <hints>
+                <hint type="sourcelabel">
+                    <x>144</x>
+                    <y>226</y>
+                </hint>
+                <hint type="destinationlabel">
+                    <x>4</x>
+                    <y>270</y>
+                </hint>
+            </hints>
+        </connection>
+    </connections>
+    <slots>
+        <slot>open_alocalmod()</slot>
+        <slot>refresh_mod_list()</slot>
+        <slot>synchronise_alocalmod()</slot>
+    </slots>
 </ui>

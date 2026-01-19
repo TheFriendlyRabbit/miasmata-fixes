@@ -3,12 +3,14 @@ Miasmata Fixes
 
 Requirements:
 ----------------------
+
 - Python 2.7.x (32bit)
 - [Microsoft Visual C++ Compiler for Python 2.7](https://web.archive.org/web/20170210071654/https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi)
 - [Microsoft Visual C++ 2008 Redistributable Package (x86) ](https://web.archive.org/web/20171019151356/http://download.microsoft.com/download/1/1/1/1116b75a-9ec3-481a-a3c8-1777b5381140/vcredist_x86.exe)
 
 Installation
 ----------------------
+
 - Add the location of MSVCP90.dll (installed with the C++ 2008 Redistributable Package) to your system path
 - ``pip install -r requirements.txt``
 
@@ -28,6 +30,7 @@ If you get no output, double check you installed the 32bit version of Python.
 Miaschiev
 ---------
 This Python application can show the progress towards several achievements:
+
 - Shows which parts of the coast have been mapped, and highlights any missing
   sections.
 - Shows which urns have been lit, and which ones are remaining. Note that this
@@ -43,39 +46,43 @@ This Python application can show the progress towards several achievements:
 
 Miasmod
 ---------
-A Python application for creating game mods. Example mods are available in the ``mods`` directory.   
+A Python application for creating game mods. Example mods are available in the ``mods`` directory.
 
 Can modify:
+
 - ``environment.rs5``
 - ``main.rs5``
-- ``saves.dat``   
-
+- ``saves.dat``
 
 See <https://steamcommunity.com/app/223510/discussions/0/630800445647188169/> for more information.
+
 ### Example mods ###
+
 - ``ailurophobia.miasmod``
-  - Removes the creature
+    - Removes the creature
 - ``cartographobia.miasmod``
-  - Prevents  map from being filled in when picking up notes
-  - Removes the effect of the mental clarity tonic (does not remove the tonic itself, only its effect)
-  - Does not clear any existing map data (requires a new save)
+    - Prevents map from being filled in when picking up notes
+    - Removes the effect of the mental clarity tonic (does not remove the tonic itself, only its effect)
+    - Does not clear any existing map data (requires a new save)
 - ``dehydrated.miasmod``
-  - Disables water jugs
-  - Only allows a single drink of water to be carried in the canteen at a time
+    - Disables water jugs
+    - Only allows a single drink of water to be carried in the canteen at a time
 - ``insomnia.miasmod``
-  - Disables sleeping in beds
-  - Removes tiredness
-  - Has not been tested enough to fully confirm functionality
+    - Disables sleeping in beds
+    - Removes tiredness
+    - Has not been tested enough to fully confirm functionality
 
 Miaspatch
 ---------
 A Python application for applying the unofficial community patch.
+
 ### Changes: ###
-- Fixes broken achievements: 
-  - ``Botanical Bad A**``
-  - ``Just doing some light reading?``
-  - ``Oh, my glorious brain...``
-  - ``The Bored Cartographer``
+
+- Fixes broken achievements:
+    - ``Botanical Bad A**``
+    - ``Just doing some light reading?``
+    - ``Oh, my glorious brain...``
+    - ``The Bored Cartographer``
 - Fixes broken ``Sanchez #1`` note that incorrectly registers as ``Sanchez #3``
 - Fixes cut off Pitcher plant research link on the objectives page
 - Fixes missing Titan plant research link on the objectives page
@@ -97,6 +104,7 @@ to better analyse the format of the game files, and the ability to repack some
 of the files came later.
 
 ### rs5-extractor.py ###
+
 This script can extract the contents of an RS5 archive into to a directory, or
 pack files from a directory into a new RS5 archive. The local file headers are
 left attached to the extracted files since they are used when repacking the RS5
@@ -106,14 +114,17 @@ It currently cannot manipulate files within an existing archive - the entire
 archive has to be unpacked and repacked to edit any contained files.
 
 ### environment.py ###
+
 This script can decode the game's environment database into human editable
 JSON, and then re-encode the JSON back into the binary format used by the game.
 
 ### data.py ###
+
 This script can decode & re-encode any database used by the game to/from JSON,
 including the saved games.
 
 ### markers.py ###
+
 This script lists and plots the location of items listed in the game's markers
 file on the game's map. These include things like structures that can be used
 to triangulate the player's position, creature spawn locations and so on.
@@ -124,6 +135,7 @@ _Currently it requires certain files to have already been extracted into
 specific locations - TODO is the ability to read them directly from main.rs5._
 
 ### inst_node.py ###
+
 This script plots the location of items listed in the game's inst nodes on the
 game's map. By default it will create one image showing the location of every
 single item in the game, as well as individual images showing the locations of
@@ -135,6 +147,7 @@ _Currently it requires certain files to have already been extracted into
 specific locations - TODO is the ability to read them directly from main.rs5._
 
 ### plot_inst_nodes.py ###
+
 This script reads the list of inst nodes that the game uses and plots their
 bounding box on the game's map. This visually shows how the game breaks up it's
 data structures that list all the items found in the game (where items also
@@ -144,6 +157,7 @@ _Currently it requires certain files to have already been extracted into
 specific locations - TODO is the ability to read them directly from main.rs5._
 
 ### lookup_inst_nodes.py ###
+
 This script takes a set of coordinates and plots the inst nodes that include
 that location on the game's map.
 
@@ -151,6 +165,7 @@ _Currently it requires certain files to have already been extracted into
 specific locations - TODO is the ability to read them directly from main.rs5._
 
 ### smap.py ###
+
 This script can decode the various SMAP type files in the game and overlay them
 on the game map.
 
@@ -158,12 +173,14 @@ _Currently it requires certain files to have already been extracted into
 specific locations - TODO is the ability to read them directly from main.rs5._
 
 ### cterr_hmap.py ###
+
 This script generates a heightmap of the game's map
 
 _Currently it requires certain files to have already been extracted into
 specific locations - TODO is the ability to read them directly from main.rs5._
 
 ### exposure_map.py ###
+
 This script decodes the exposure map field from a saved game & overlays the
 bored cartographer achievement smap to track down any missing pixels.
 
@@ -174,7 +191,9 @@ specific locations - TODO is the ability to read them directly from main.rs5._
 
 DEPRECATED
 ----------------------
+
 ### BotanicalBadAssPatcher ###
+
 This is a small C# program that automates the process of patching Miasmata.exe
 to fix the broken Botanical Bad A\*\* achievement. This fix can now be performed by Miaspatch.
 

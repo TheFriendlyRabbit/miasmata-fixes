@@ -2,6 +2,7 @@
 
 from gimpfu import *
 
+
 def merge_journal_mask(source_file, mask_file, output_file):
     image = pdb.gimp_file_load(source_file, source_file)
 
@@ -16,6 +17,7 @@ def merge_journal_mask(source_file, mask_file, output_file):
 
     pdb.gimp_xcf_save(0, image, image.active_layer, output_file, output_file)
     image.clean_all()
+
 
 register(
     "miasmata_merge_journal_mask",

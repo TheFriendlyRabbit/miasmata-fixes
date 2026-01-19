@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
+import os
+
 from gimpfu import *
+
 from miasmata_gimp import *
 
-import os
 
 def heal_text(source_file, output_basename):
     image = pdb.gimp_file_load(source_file, source_file)
@@ -32,17 +34,20 @@ def heal_text(source_file, output_basename):
     pdb.gimp_context_set_sample_criterion(SELECT_CRITERION_COMPOSITE)
     pdb.gimp_context_set_sample_threshold(15.0 / 255.0)
     pdb.gimp_context_set_sample_transparent(TRUE)
-    pdb.gimp_image_select_color(image, CHANNEL_OP_REPLACE, original_layer, (255, 255, 255))
+    pdb.gimp_image_select_color(image, CHANNEL_OP_REPLACE, original_layer,
+                                (255, 255, 255))
 
     pdb.gimp_selection_grow(image, 1)
 
     pdb.gimp_edit_clear(mask_layer)
-    # pdb.python_fu_heal_selection(image, healed_layer, 50, "All around", "Outwards from center")
+    # pdb.python_fu_heal_selection(image, healed_layer, 50, "All around",
+    # "Outwards from center")
     pdb.python_fu_heal_selection(image, healed_layer, 50, 0, 2)
 
     save_xcf(image, '%s.xcf' % output_basename)
     image.flatten()
     save_jpg(image, '%s.jpg' % output_basename)
+
 
 register(
     "miasmata_heal_text",

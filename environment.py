@@ -6,114 +6,131 @@ import data
 import rs5archive
 import rs5file
 
+
 def get_env_chunk(f):
-	chunks = rs5file.Rs5ChunkedFileDecoder(f)
-	assert(chunks.magic == 'RAW.')
-	assert(chunks.filename == 'environment')
-	assert(chunks.u2 == 1)
-	assert(len(chunks) == 1)
-	return chunks['DATA']
+    chunks = rs5file.Rs5ChunkedFileDecoder(f)
+    assert (chunks.magic == 'RAW.')
+    assert (chunks.filename == 'environment')
+    assert (chunks.u2 == 1)
+    assert (len(chunks) == 1)
+    return chunks['DATA']
+
 
 def parse_environment(f, outputfd):
-	e = get_env_chunk(f)
+    e = get_env_chunk(f)
 
-	data.chunk2json(e, outputfd)
+    data.chunk2json(e, outputfd)
+
 
 def make_chunks(buf):
-	chunk = data.make_chunk(buf)
-	chunks = rs5file.Rs5ChunkedFileEncoder('RAW.', 'environment', 1, chunk)
-	return chunks.encode()
+    chunk = data.make_chunk(buf)
+    chunks = rs5file.Rs5ChunkedFileEncoder('RAW.', 'environment', 1, chunk)
+    return chunks.encode()
+
 
 def extract_from_archive(filename):
-	f = open(filename, 'rb')
-	archive = rs5archive.Rs5ArchiveDecoder(f)
-	chunks = rs5file.Rs5ChunkedFileDecoder(archive['environment'].decompress())
-	return chunks['DATA']
+    f = open(filename, 'rb')
+    archive = rs5archive.Rs5ArchiveDecoder(f)
+    chunks = rs5file.Rs5ChunkedFileDecoder(archive['environment'].decompress())
+    return chunks['DATA']
+
 
 def parse_from_archive(filename):
-	return data.parse_chunk(extract_from_archive(filename))
+    return data.parse_chunk(extract_from_archive(filename))
+
 
 def encode_to_archive(root, path):
-	import os
+    import os
 
-	buf = data.encode(root)
-	buf = make_chunks(buf)
+    buf = data.encode(root)
+    buf = make_chunks(buf)
 
-	if os.path.exists(path):
-		# TODO: Prompt to repack archive to save space
-		archive = rs5archive.Rs5ArchiveUpdater(open(path, 'rb+'))
-		if len(archive) == 1 and 'environment' in archive:
-			# Blow it away and create a fresh one to prevent wasted
-			# space.
-			archive = rs5archive.Rs5ArchiveEncoder(path)
-	else:
-		archive = rs5archive.Rs5ArchiveEncoder(path)
+    if os.path.exists(path):
+        # TODO: Prompt to repack archive to save space
+        archive = rs5archive.Rs5ArchiveUpdater(open(path, 'rb+'))
+        if len(archive) == 1 and 'environment' in archive:
+            # Blow it away and create a fresh one to prevent wasted
+            # space.
+            archive = rs5archive.Rs5ArchiveEncoder(path)
+    else:
+        archive = rs5archive.Rs5ArchiveEncoder(path)
 
-	archive.add_from_buf(buf)
-	archive.save()
+    archive.add_from_buf(buf)
+    archive.save()
+
 
 def json2env(j, outputfd):
-	outputfd.write(make_chunks(data.json2data(j)))
+    outputfd.write(make_chunks(data.json2data(j)))
 
-def diff_environments((f1, f2), output, pretty=False):
-	env1 = data.parse_chunk(get_env_chunk(f1))
-	env2 = data.parse_chunk(get_env_chunk(f2))
-	diff = data.diff_data(env1, env2)
-	if pretty:
-		data.pretty_print_diff(diff)
-	else:
-		data.json_encode_diff(diff, output)
 
-def apply_diff((input_fd, diff_fd), output_fd):
-	env = data.parse_chunk(get_env_chunk(input_fd))
-	diff = data.json_decode_diff(diff_fd)
-	# print diff
-	data.apply_diff(env, diff)
-	output_fd.write(make_chunks(data.encode(env)))
+def diff_environments(xxx_todo_changeme, output, pretty=False):
+    (f1, f2) = xxx_todo_changeme
+    env1 = data.parse_chunk(get_env_chunk(f1))
+    env2 = data.parse_chunk(get_env_chunk(f2))
+    diff = data.diff_data(env1, env2)
+    if pretty:
+        data.pretty_print_diff(diff)
+    else:
+        data.json_encode_diff(diff, output)
+
+
+def apply_diff(xxx_todo_changeme1, output_fd):
+    (input_fd, diff_fd) = xxx_todo_changeme1
+    env = data.parse_chunk(get_env_chunk(input_fd))
+    diff = data.json_decode_diff(diff_fd)
+    # print diff
+    data.apply_diff(env, diff)
+    output_fd.write(make_chunks(data.encode(env)))
+
 
 def parse_args():
-	import argparse
-	parser = argparse.ArgumentParser()
+    import argparse
+    parser = argparse.ArgumentParser()
 
-	group = parser.add_mutually_exclusive_group(required=True)
-	group.add_argument('-d', '--decode-file', metavar='FILE',
-			help='Decode a previously extracted environment file')
-	group.add_argument('-e', '--encode-file', metavar='FILE',
-			help='Encode a JSON formatted environment file')
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('-d', '--decode-file', metavar='FILE',
+                       help='Decode a previously extracted environment file')
+    group.add_argument('-e', '--encode-file', metavar='FILE',
+                       help='Encode a JSON formatted environment file')
 
-	group.add_argument('--diff-pretty', nargs=2, metavar='FILE',
-			type=argparse.FileType('rb'),
-			help='Display the differences between two environment files in a human readable format')
-	group.add_argument('--diff-json', nargs=2, metavar='FILE',
-			type=argparse.FileType('rb'),
-			help='Write the differences between two environment files suitable for use with --apply-diff')
-	group.add_argument('--apply-diff', nargs=2, metavar=('FILE', 'DIFF'),
-			type=argparse.FileType('rb'),
-			help='Apply a diff file generated by --diff-json to the specified environment file')
+    group.add_argument('--diff-pretty', nargs=2, metavar='FILE',
+                       type=argparse.FileType('rb'),
+                       help='Display the differences between two environment '
+                            'files in a human readable format')
+    group.add_argument('--diff-json', nargs=2, metavar='FILE',
+                       type=argparse.FileType('rb'),
+                       help='Write the differences between two environment '
+                            'files suitable for use with --apply-diff')
+    group.add_argument('--apply-diff', nargs=2, metavar=('FILE', 'DIFF'),
+                       type=argparse.FileType('rb'),
+                       help='Apply a diff file generated by --diff-json to '
+                            'the specified environment file')
 
-	parser.add_argument('-o', '--output',
-			type=argparse.FileType('wb'), default=sys.stdout,
-			help='Store the result in OUTPUT')
+    parser.add_argument('-o', '--output',
+                        type=argparse.FileType('wb'), default=sys.stdout,
+                        help='Store the result in OUTPUT')
 
-	return parser.parse_args()
+    return parser.parse_args()
+
 
 def main():
-	args = parse_args()
+    args = parse_args()
 
-	if args.decode_file:
-		return parse_environment(open(args.decode_file, 'rb'), args.output)
+    if args.decode_file:
+        return parse_environment(open(args.decode_file, 'rb'), args.output)
 
-	if args.encode_file:
-		return json2env(open(args.encode_file, 'rb'), args.output)
+    if args.encode_file:
+        return json2env(open(args.encode_file, 'rb'), args.output)
 
-	if args.diff_pretty:
-		return diff_environments(args.diff_pretty, args.output, pretty=True)
-	if args.diff_json:
-		return diff_environments(args.diff_json, args.output)
-	if args.apply_diff:
-		return apply_diff(args.apply_diff, args.output)
+    if args.diff_pretty:
+        return diff_environments(args.diff_pretty, args.output, pretty=True)
+    if args.diff_json:
+        return diff_environments(args.diff_json, args.output)
+    if args.apply_diff:
+        return apply_diff(args.apply_diff, args.output)
+
 
 if __name__ == '__main__':
-	main()
+    main()
 
 # vi:noexpandtab:sw=8:ts=8

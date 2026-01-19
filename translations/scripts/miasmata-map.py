@@ -1,17 +1,20 @@
 #!/usr/bin/env python
 
 from gimpfu import *
+
 from miasmata_gimp import *
 
 font = Font('Neu Phollick Alpha', 20.0, True)
 
 radius = 8.0
 
+
 def add_map_text(image, file, x, y, xalign=CENTER, yalign=CENTER):
     txt = read_text(file)
     shadow = add_text(image, txt, font, colour=(0, 0, 0))
     place_text(shadow, x, y, xalign=xalign, yalign=yalign)
-    pdb.gimp_layer_resize(shadow, shadow.width + 2*radius, shadow.height + 2*radius, radius, radius)
+    pdb.gimp_layer_resize(shadow, shadow.width + 2 * radius,
+                          shadow.height + 2 * radius, radius, radius)
     blur_layer(image, shadow, radius=radius)
     mask = pdb.gimp_layer_create_mask(shadow, ADD_ALPHA_TRANSFER_MASK)
     pdb.gimp_layer_create_mask(shadow, ADD_ALPHA_TRANSFER_MASK)
@@ -21,6 +24,7 @@ def add_map_text(image, file, x, y, xalign=CENTER, yalign=CENTER):
     layer = add_text(image, txt, font, colour=(255, 255, 255))
     blur_layer(image, layer, 0.5)
     place_text(layer, x, y, xalign=xalign, yalign=yalign)
+
 
 def compose_overlay_map(source_blank_image, output_basename, include_text):
     image = pdb.gimp_file_load(source_blank_image, source_blank_image)
@@ -39,6 +43,7 @@ def compose_overlay_map(source_blank_image, output_basename, include_text):
 
     save(image, output_basename, mipmaps=True)
 
+
 register(
     "miasmata_map",
     "Compose the Miasmata overlay map",
@@ -49,9 +54,13 @@ register(
     "<Toolbox>/_Miasmata/_Map",
     None,
     [
-        (PF_FILE, "source_blank_image", "Background image to use that should have previously had the text removed", None),
+        (PF_FILE, "source_blank_image",
+         "Background image to use that should have previously had the text "
+         "removed",
+         None),
         (PF_STRING, "output_basename", "Base output filename", None),
-        (PF_BOOL, "include_text", "Add text. If false, just copy (convenience for Map_FilledIn)", None),
+        (PF_BOOL, "include_text",
+         "Add text. If false, just copy (convenience for Map_FilledIn)", None),
     ],
     [],
     compose_overlay_map,

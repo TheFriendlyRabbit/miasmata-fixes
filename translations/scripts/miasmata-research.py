@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from gimpfu import *
+
 from miasmata_gimp import *
 
 header_font = Font('Neu Phollick Alpha', 45.0, True)
@@ -8,11 +9,13 @@ font = Font('Neu Phollick Alpha', 40.0, True, -5.0)
 font_small = Font('Neu Phollick Alpha', 32.0, True, -5.0)
 research_font = Font('Neu Phollick Alpha Bold', 40.0, False)
 
+
 def desc_font(plant):
     return {
-            'Plant_E': font_small,
-            'Plant_J': font_small,
+        'Plant_E': font_small,
+        'Plant_J': font_small,
     }.get(plant, font)
+
 
 w = h = 1024
 
@@ -29,42 +32,51 @@ genus_y2 = 203
 
 desc_x, desc_x2 = 185, 990
 
+
 def desc_header_y(plant):
     return {
-            'Plant_E': 532,
-            'Plant_J': 532,
+        'Plant_E': 532,
+        'Plant_J': 532,
     }.get(plant, 696)
+
 
 def desc_y(plant):
     return desc_header_y(plant) + {
-            'Plant_E': 50,
-            'Plant_J': 50,
+        'Plant_E': 50,
+        'Plant_J': 50,
     }.get(plant, 62)
 
 
 research_x1, research_x2, research_y = 110, 825, 85
 
+
 def research_2(txt, x1, y1, x2, y2):
     yield (txt, x1, 195, x2, y2, TEXT_JUSTIFY_LEFT)
+
 
 def research_9(txt, x1, y1, x2, y2):
     yield (txt, x1, 120, x2, y2, TEXT_JUSTIFY_LEFT)
 
+
 def research_18(txt, x1, y1, x2, y2):
     yield (txt, x1, 125, x2, y2, TEXT_JUSTIFY_LEFT)
+
 
 def research_20(txt, x1, y1, x2, y2):
     txt = txt.split('\n', 1)
     yield (txt[0], x1, y1, x2, 195, TEXT_JUSTIFY_LEFT)
     yield (txt[1].strip(), x1, 450, x2, y2, TEXT_JUSTIFY_LEFT)
 
+
 def research_25(txt, x1, y1, x2, y2):
     txt = txt.split('\n', 1)
     yield (txt[0], x1, y1, x2, y2, TEXT_JUSTIFY_LEFT)
     yield (txt[1].strip(), x1, 215, x2, y2, TEXT_JUSTIFY_RIGHT)
 
+
 def research_def(txt, x1, y1, x2, y2):
     yield (txt, x1, y1, x2, y2, TEXT_JUSTIFY_LEFT)
+
 
 def research_coords(research, file, y2):
     txt = read_text(file)
@@ -76,8 +88,9 @@ def research_coords(research, file, y2):
         'RESEARCH_25': research_25,
     }.get(research, research_def)(txt, research_x1, research_y, research_x2, y2)
 
+
 research2_coords = {
-    'RESEARCH_0': (rh_x + rh_w/2 + 40, 380, None, CENTER, header_font),
+    'RESEARCH_0': (rh_x + rh_w / 2 + 40, 380, None, CENTER, header_font),
     'Research_K': (90, 730, 825, LEFT, research_font),
 }
 
@@ -85,9 +98,12 @@ research2_coords = {
 def add_header(image, header_txt, rh=False):
     layer = add_text(image, header_txt, header_font)
     if rh:
-        place_text(layer, rh_x + rh_w / 2, header_h / 2, xalign=CENTER, yalign=CENTER)
+        place_text(layer, rh_x + rh_w / 2, header_h / 2, xalign=CENTER,
+                   yalign=CENTER)
     else:
-        place_text(layer, lh_x + lh_w / 2, header_h / 2, xalign=CENTER, yalign=CENTER)
+        place_text(layer, lh_x + lh_w / 2, header_h / 2, xalign=CENTER,
+                   yalign=CENTER)
+
 
 def add_subheader(image, left_txt, right_txt, y2):
     layer = add_text(image, left_txt, font)
@@ -95,9 +111,11 @@ def add_subheader(image, left_txt, right_txt, y2):
     layer = add_text(image, right_txt, font)
     place_text(layer, subheader_rx, y2, yalign=BOTTOM)
 
+
 def add_desc_header(image, txt, plant):
     layer = add_text(image, txt, font)
     place_text(layer, desc_x, desc_header_y(plant))
+
 
 def add_desc(image, txt, plant):
     layer = add_text(image, txt, desc_font(plant))
@@ -105,12 +123,13 @@ def add_desc(image, txt, plant):
     place_text(layer, desc_x, y, desc_x2)
 
 
-def compose_drug_image(template_txt_file, source_txt_file, source_blank_image, output_basename):
+def compose_drug_image(template_txt_file, source_txt_file, source_blank_image,
+                       output_basename):
     template = read_text(template_txt_file)
     (header_txt, name_templ_txt, func_templ_txt) = template.split('\n')
 
     txt = read_text(source_txt_file)
-    name_txt, desc_txt = map(unicode.strip, txt.split('\n', 1))
+    name_txt, desc_txt = list(map(str.strip, txt.split('\n', 1)))
 
     image = pdb.gimp_file_load(source_blank_image, source_blank_image)
 
@@ -121,12 +140,15 @@ def compose_drug_image(template_txt_file, source_txt_file, source_blank_image, o
 
     save(image, output_basename)
 
-def compose_plant_image(template_txt_file, source_txt_file, source_blank_image, output_basename):
+
+def compose_plant_image(template_txt_file, source_txt_file, source_blank_image,
+                        output_basename):
     template = read_text(template_txt_file)
-    (header_txt, name_templ_txt, genus_templ_txt, observ_templ_txt) = template.split('\n')
+    (header_txt, name_templ_txt, genus_templ_txt,
+     observ_templ_txt) = template.split('\n')
 
     txt = read_text(source_txt_file)
-    name_txt, genus_txt, desc_txt = map(unicode.strip, txt.split('\n', 2))
+    name_txt, genus_txt, desc_txt = list(map(str.strip, txt.split('\n', 2)))
 
     image = pdb.gimp_file_load(source_blank_image, source_blank_image)
 
@@ -138,7 +160,10 @@ def compose_plant_image(template_txt_file, source_txt_file, source_blank_image, 
 
     save(image, output_basename)
 
-def compose_research_image(template_txt_file, source_txt_file, source_conclusion_txt_file, source_blank_image, output_basename):
+
+def compose_research_image(template_txt_file, source_txt_file,
+                           source_conclusion_txt_file, source_blank_image,
+                           output_basename):
     import struct
 
     template = read_text(template_txt_file)
@@ -170,13 +195,14 @@ def compose_research_image(template_txt_file, source_txt_file, source_conclusion
     threshold = 64
     while True:
         # XXX: Assumes 32bpp image, ignores alpha
-        (r, g, b, a) = struct.unpack("4B", tile[x % tile.ewidth, y % tile.eheight])
+        (r, g, b, a) = struct.unpack("4B",
+                                     tile[x % tile.ewidth, y % tile.eheight])
         v = (r + g + b) / 3
 
         if at_line and v > threshold:
             at_line = False
         elif not at_line and v <= threshold:
-            print "Found line at %i" % y
+            print("Found line at %i" % y)
             at_line = True
             lines.append(y)
             if len(lines) == 2:
@@ -189,13 +215,16 @@ def compose_research_image(template_txt_file, source_txt_file, source_conclusion
 
     add_header(image, header_txt, True)
 
-    for (txt, x1, y1, x2, y2, justify) in research_coords(output_basename, source_txt_file, lines[1]):
+    for (txt, x1, y1, x2, y2, justify) in research_coords(output_basename,
+                                                          source_txt_file,
+                                                          lines[1]):
         text = add_text(image, txt, research_font, colour=(105, 105, 105))
         pdb.gimp_text_layer_set_justification(text, justify)
         place_text(text, x1, y1, x2)
         line_spacing = pdb.gimp_text_layer_get_line_spacing(text)
         while True:
-            group = masked_word_wrap(text, mask, x2-x1, channel=channel, test=test)
+            group = masked_word_wrap(text, mask, x2 - x1, channel=channel,
+                                     test=test)
             if y1 + group.height < y2:
                 break
             pdb.gimp_image_remove_layer(image, group)
@@ -205,7 +234,8 @@ def compose_research_image(template_txt_file, source_txt_file, source_conclusion
     # Place conclusion, using mask again for Spanish RESEARCH_27:
     y = lines[1] + 10
     conclusion = read_text(source_conclusion_txt_file)
-    layer = add_text(image, '%s\n\n%s' % (conclusion_templ_txt, conclusion), research_font)
+    layer = add_text(image, '%s\n\n%s' % (conclusion_templ_txt, conclusion),
+                     research_font)
     height = lines[0] - y - 10
 
     # word_wrap(layer, None, research_x2 - research_x1)
@@ -215,7 +245,8 @@ def compose_research_image(template_txt_file, source_txt_file, source_conclusion
     place_text(layer, research_x1, y)
     line_spacing = pdb.gimp_text_layer_get_line_spacing(layer)
     while True:
-        group = masked_word_wrap(layer, mask, research_x2 - research_x1, channel=channel, test=test)
+        group = masked_word_wrap(layer, mask, research_x2 - research_x1,
+                                 channel=channel, test=test)
         if group.height < height:
             break
         pdb.gimp_image_remove_layer(image, group)
@@ -224,7 +255,9 @@ def compose_research_image(template_txt_file, source_txt_file, source_conclusion
 
     save(image, output_basename)
 
-def compose_research2_image(template_txt_file, source_txt_file, source_blank_image, output_basename):
+
+def compose_research2_image(template_txt_file, source_txt_file,
+                            source_blank_image, output_basename):
     template = read_text(template_txt_file)
     (header_txt, conclusion_templ_txt) = template.split('\n')
 
@@ -237,6 +270,7 @@ def compose_research2_image(template_txt_file, source_txt_file, source_blank_ima
 
     save(image, output_basename)
 
+
 register(
     "miasmata_drug",
     "Compose an image for Miasmata's Journal drug synthesis pages",
@@ -247,9 +281,16 @@ register(
     "<Toolbox>/_Miasmata/_Drug",
     None,
     [
-        (PF_FILE, "template_txt_file", "utf-8 encoded file with the translations of 'Biomedical Research', 'Name:' and 'Function:', one per line", None),
-        (PF_FILE, "source_txt_file", "utf-8 encoded file with the text to place on the image", None),
-        (PF_FILE, "source_blank_image", "Background image to use that should have previously had the text removed", None),
+        (PF_FILE, "template_txt_file",
+         "utf-8 encoded file with the translations of 'Biomedical Research', "
+         "'Name:' and 'Function:', one per line",
+         None),
+        (PF_FILE, "source_txt_file",
+         "utf-8 encoded file with the text to place on the image", None),
+        (PF_FILE, "source_blank_image",
+         "Background image to use that should have previously had the text "
+         "removed",
+         None),
         (PF_STRING, "output_basename", "Base output filename", None),
     ],
     [],
@@ -266,9 +307,16 @@ register(
     "<Toolbox>/_Miasmata/_Plant",
     None,
     [
-        (PF_FILE, "template_txt_file", "utf-8 encoded file with the translations of 'Specimen Observation', 'Name:', 'Genus:' and 'Observations:', one per line", None),
-        (PF_FILE, "source_txt_file", "utf-8 encoded file with the text to place on the image", None),
-        (PF_FILE, "source_blank_image", "Background image to use that should have previously had the text removed", None),
+        (PF_FILE, "template_txt_file",
+         "utf-8 encoded file with the translations of 'Specimen Observation', "
+         "'Name:', 'Genus:' and 'Observations:', one per line",
+         None),
+        (PF_FILE, "source_txt_file",
+         "utf-8 encoded file with the text to place on the image", None),
+        (PF_FILE, "source_blank_image",
+         "Background image to use that should have previously had the text "
+         "removed",
+         None),
         (PF_STRING, "output_basename", "Base output filename", None),
     ],
     [],
@@ -285,10 +333,19 @@ register(
     "<Toolbox>/_Miasmata/_Research",
     None,
     [
-        (PF_FILE, "template_txt_file", "utf-8 encoded file with the translations of 'Laboratory Research' and 'My Conclusion:', one per line", None),
-        (PF_FILE, "source_txt_file", "utf-8 encoded file with the method text to place on the image", None),
-        (PF_FILE, "source_conclusion_txt_file", "utf-8 encoded file with the conclusion text to place on the image", None),
-        (PF_FILE, "source_blank_image", "Background image to use that should have previously had the text removed", None),
+        (PF_FILE, "template_txt_file",
+         "utf-8 encoded file with the translations of 'Laboratory Research' "
+         "and 'My Conclusion:', one per line",
+         None),
+        (PF_FILE, "source_txt_file",
+         "utf-8 encoded file with the method text to place on the image", None),
+        (PF_FILE, "source_conclusion_txt_file",
+         "utf-8 encoded file with the conclusion text to place on the image",
+         None),
+        (PF_FILE, "source_blank_image",
+         "Background image to use that should have previously had the text "
+         "removed",
+         None),
         (PF_STRING, "output_basename", "Base output filename", None),
     ],
     [],
@@ -297,17 +354,26 @@ register(
 
 register(
     "miasmata_research2",
-    "Compose an image for Miasmata's Journal plant research pages 0 and K - without conclusion)",
-    "Compose an image for Miasmata's Journal plant research pages (0 and K - without conclusion)",
+    "Compose an image for Miasmata's Journal plant research pages 0 and K - "
+    "without conclusion)",
+    "Compose an image for Miasmata's Journal plant research pages (0 and K - "
+    "without conclusion)",
     "Ian Munsie",
     "Ian Munsie",
     "2014",
     "<Toolbox>/_Miasmata/_Research2",
     None,
     [
-        (PF_FILE, "template_txt_file", "utf-8 encoded file with the translations of 'Laboratory Research' and 'My Conclusion:', one per line", None),
-        (PF_FILE, "source_txt_file", "utf-8 encoded file with the text to place on the image", None),
-        (PF_FILE, "source_blank_image", "Background image to use that should have previously had the text removed", None),
+        (PF_FILE, "template_txt_file",
+         "utf-8 encoded file with the translations of 'Laboratory Research' "
+         "and 'My Conclusion:', one per line",
+         None),
+        (PF_FILE, "source_txt_file",
+         "utf-8 encoded file with the text to place on the image", None),
+        (PF_FILE, "source_blank_image",
+         "Background image to use that should have previously had the text "
+         "removed",
+         None),
         (PF_STRING, "output_basename", "Base output filename", None),
     ],
     [],
