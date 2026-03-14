@@ -28,7 +28,7 @@ def parse_markers(chunks):
 
 
 def main():
-    import miasmap
+    from lib import miasmap
     chunks = rs5file.Rs5ChunkedFileDecoder(open('markers').read())
     filters = sys.argv[1:]
     colours = ((128, 0, 0), (0, 128, 0), (0, 0, 128), (128, 128, 0),

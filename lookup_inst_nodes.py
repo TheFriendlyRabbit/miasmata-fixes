@@ -4,16 +4,17 @@ import os
 import sys
 
 import inst_header
-from miasmap import plot_point
+from lib.miasmap import Miasmap
 
 
 def main():
     (x, y) = list(map(float, sys.argv[1:3]))
+    map_obj = Miasmap()
 
     # Rotate coord 90 degrees clockwise (transpose then mirror x):
     (x, y) = (inst_header.width - y, x)
     print('Rotated back to inst coordinates: %d x %d' % (x, y))
-    plot_point(x, y, (255, 255, 255), (230, 230, 230))
+    map_obj.plot_point(x, y, (255, 255, 255), (230, 230, 230))
 
     for (n, (x1, y1, z1, x2, y2, z2)) in inst_header.get_points():
         assert x2 > x1
@@ -30,8 +31,8 @@ def main():
                 '%sinst_node%-6d | %8.3f %8.3f %9.3f  x  %8.3f %8.3f %8.3f  | '
                 ' %4.0f x %-4.0f%s' % \
                 (c, n, x1, y1, z1, x2, y2, z2, x2 - x1, y2 - y1, r))
-            inst_header.plot_node(x1, y1, z1, x2, y2, z2, 128, 128, exists)
-    inst_header.save_image('lookup_nodes.png')
+            map_obj.plot_node(x1, y1, z1, x2, y2, z2, 128, 128, exists)
+    map_obj.save_image('lookup_nodes.png')
 
 
 if __name__ == '__main__':

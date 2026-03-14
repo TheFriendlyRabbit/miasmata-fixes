@@ -56,22 +56,6 @@ Can modify:
 
 See <https://steamcommunity.com/app/223510/discussions/0/630800445647188169/> for more information.
 
-### Example mods ###
-
-- ``ailurophobia.miasmod``
-    - Removes the creature
-- ``cartographobia.miasmod``
-    - Prevents map from being filled in when picking up notes
-    - Removes the effect of the mental clarity tonic (does not remove the tonic itself, only its effect)
-    - Does not clear any existing map data (requires a new save)
-- ``dehydrated.miasmod``
-    - Disables water jugs
-    - Only allows a single drink of water to be carried in the canteen at a time
-- ``insomnia.miasmod``
-    - Disables sleeping in beds
-    - Removes tiredness
-    - Has not been tested enough to fully confirm functionality
-
 Miaspatch
 ---------
 A Python application for applying the unofficial community patch.
@@ -142,16 +126,6 @@ single item in the game, as well as individual images showing the locations of
 each specific type of item.
 
 **This script can take a long time to run!**
-
-_Currently it requires certain files to have already been extracted into
-specific locations - TODO is the ability to read them directly from main.rs5._
-
-### plot_inst_nodes.py ###
-
-This script reads the list of inst nodes that the game uses and plots their
-bounding box on the game's map. This visually shows how the game breaks up it's
-data structures that list all the items found in the game (where items also
-includes grass, trees, rocks, etc).
 
 _Currently it requires certain files to have already been extracted into
 specific locations - TODO is the ability to read them directly from main.rs5._

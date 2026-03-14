@@ -7,18 +7,17 @@ import sys
 import time
 import traceback
 
+from PIL import Image, ImageDraw, ImageQt
 # --- PySide ---
 from PySide6 import QtCore, QtGui
-from PySide6.QtWidgets import QMessageBox, QApplication, QMainWindow, QTabBar, \
-    QFileDialog, QLabel
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QLabel
 
-from PIL import Image, ImageDraw, ImageQt
-from miaschiev_ui import Ui_Miaschiev
-
-import miasutil
 import data
-import markers
 import exposure_map
+import markers
+from lib import miasutil, imag
+from lib.miasmap import Miasmap
+from ui.miaschiev_ui import Ui_Miaschiev
 
 reset_statue_unmatched_warning = '''
 WARNING: Target statue is not listed in the save's landmarks list. This
@@ -84,6 +83,8 @@ class Miaschiev(QMainWindow):
     def __init__(self, parent=None):
         super(Miaschiev, self).__init__(parent)
 
+        self.map = Miasmap()
+
         self.ui = Ui_Miaschiev()
         self.ui.setupUi(self)  # doesn't work with a dynamically loaded UI
 
@@ -129,31 +130,13 @@ class Miaschiev(QMainWindow):
         self.statusBar().showMessage(msg)
 
     def process_install_path(self, path):
-        import rs5archive, rs5file, imag, environment
-        # def _async():
-        main_path = os.path.join(path, 'main.rs5')
+        import rs5file, environment
+
         self.progress('Loading main.rs5...')
-        try:
-            self.rs5main = rs5archive.Rs5ArchiveDecoder(open(main_path, 'rb'))
-            self.progress('main.rs5 Loaded')
-        except Exception as e:
-            traceback.print_exc()
-            self.done(
-                '%s loading main.rs5: %s' % (e.__class__.__name__, str(e)))
-            return
+        self.rs5main = miasutil.load_rs5_file('main.rs5', path)
 
-        self.progress('Extracting Map_FilledIn...')
-        filledin = rs5file.Rs5ChunkedFileDecoder(
-            self.rs5main['TEX\\Map_FilledIn'].decompress())
-        self.progress('Decoding Map_FilledIn...')
-        self.filledin = imag.open_rs5file_imag(filledin, (1024, 1024), 'RGB')
-
-        self.progress('Extracting Map_OverlayInfo...')
-        overlayinfo = rs5file.Rs5ChunkedFileDecoder(
-            self.rs5main['TEX\\Map_OverlayInfo'].decompress())
-        self.progress('Decoding Map_OverlayInfo...')
-        self.overlayinfo = imag.open_rs5file_imag(overlayinfo, (1024, 1024),
-                                                  'RGB')
+        self.filledin = imag.load_rs5file_imag("Map_FilledIn", (1024, 1024), 'RGB', path)
+        self.overlayinfo = imag.load_rs5file_imag("Map_OverlayInfo", (1024, 1024), 'RGB', path)
 
         self.progress('Extracting markers...')
         self.markers = rs5file.Rs5ChunkedFileDecoder(
@@ -195,7 +178,7 @@ class Miaschiev(QMainWindow):
                 '%s loading saves.dat: %s' % (e.__class__.__name__, str(e)))
             return
         enable_slots = filter(
-            lambda x: self.saves[x]['text_description'] != None,
+            lambda x: self.saves[x]['text_description'] is not None,
             ['save0', 'save1', 'save2'])
         # self.enable_save_slots(self.saves.children.keys())
         self.enable_save_slots(enable_slots)
@@ -404,7 +387,7 @@ class Miaschiev(QMainWindow):
 
     def count_notes(self, save):
         notes = save['player']['journal']['notes']
-        if notes == None:
+        if notes is None:
             notes = {}
         removed = save['inst_tree']['removed_types']
         self.ui.notes.setText(str(len(notes)))
@@ -414,7 +397,7 @@ class Miaschiev(QMainWindow):
 
     def count_plants(self, save):
         plants = save['player']['journal']['plants']
-        if plants == None:
+        if plants is None:
             plants = []
         else:
             plants = plants.keys()
@@ -565,9 +548,9 @@ class Miaschiev(QMainWindow):
     def on_install_browse_clicked(self):
         install_path = self.ui.install_path.text()
         dialog = QFileDialog(self,
-                                   caption="Select Miasmata Install "
-                                           "Location...",
-                                   directory=install_path)
+                             caption="Select Miasmata Install "
+                                     "Location...",
+                             directory=install_path)
         dialog.setFileMode(QFileDialog.FileMode.Directory)
         if not dialog.exec_():
             return
@@ -584,11 +567,11 @@ class Miaschiev(QMainWindow):
     def on_save_browse_clicked(self):
         save_path = self.ui.save_path.text()
         save_path = QFileDialog.getOpenFileName(self,
-                                                      "Select Miasmata Saved "
-                                                      "Game...",
-                                                      save_path,
-                                                      'Miasmata save files ('
-                                                      '*.dat)')[
+                                                "Select Miasmata Saved "
+                                                "Game...",
+                                                save_path,
+                                                'Miasmata save files ('
+                                                '*.dat)')[
             0]
         if not save_path:
             return

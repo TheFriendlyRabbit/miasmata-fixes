@@ -3,12 +3,12 @@
 import io
 import struct
 
+from lib import miasmap
 import rs5file
-import miasmap
 
 
 def parse_inst_header_header(f):
-    assert f.read(6) == '\0\x47\0\0\0\x46'
+    assert f.read(6) == b'\0\x47\0\0\0\x46'
     (nodes,) = struct.unpack('<I', f.read(4))
     return nodes
 
@@ -24,7 +24,7 @@ def get_points(f=None):
 
 def open_inst_header_from_rs5(main_rs5):
     decompressed = main_rs5['inst_header'].decompress()
-    return io.StringIO(decompressed)
+    return io.BytesIO(decompressed)
 
 
 def _get_name_list(f=None):
@@ -35,7 +35,7 @@ def _get_name_list(f=None):
     seek = nodes * 6 * 4
     f.seek(seek, 1)
     (num_entries,) = struct.unpack('<I', f.read(4))
-    return f.read(filesize - 14 - seek).rstrip('\0').split('\0')
+    return f.read(filesize - 14 - seek).rstrip(b'\0').split(b'\0')
 
 
 names = None
@@ -45,22 +45,9 @@ def get_name_list(f=None):
     global names
     if names is None:
         names = _get_name_list(f)
+    for idx, val in enumerate(names):
+        if not isinstance(val, str):
+            names[idx] = val.decode('ascii')
     return names
-
-
-def plot_node(x1, y1, z1, x2, y2, z2, r=64, wierd=8, exists=64):
-    l1 = int((z1 - miasmap.MINZ) * 255.0 / (miasmap.MAXZ - miasmap.MINZ))
-    l2 = int((z2 - miasmap.MINZ) * 255.0 / (miasmap.MAXZ - miasmap.MINZ))
-
-    if z1 == 10000000.0 or z2 == -1000000.0:
-        rgb1 = rgb2 = (0, 0, wierd)
-    elif exists:
-        rgb1 = (exists, l1, 0)
-        rgb2 = (exists, l2, 0)
-    else:
-        rgb1 = (r, 0, 0)
-        rgb2 = (r, 0, 0)
-
-    miasmap.plot_rect(int(x1), int(y1), rgb1, int(x2), int(y2), rgb2)
 
 # vi:noexpandtab:sw=8:ts=8

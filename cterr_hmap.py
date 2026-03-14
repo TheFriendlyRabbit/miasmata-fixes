@@ -11,9 +11,9 @@ import rs5file
 
 
 def open_cterr_hmap_from_rs5(main_rs5):
-    f = io.StringIO(main_rs5['cterr_hmap'].decompress())
+    f = io.BytesIO(main_rs5['cterr_hmap'].decompress())
     (magic, filename, filesize, u2) = rs5file.parse_rs5file_header(f)
-    assert magic == 'RAW.'
+    assert magic == b'RAW.'
     assert filename == 'cterr_hmap'
     assert u2 == 0
     w = h = int(math.sqrt(filesize / 4))
@@ -25,7 +25,7 @@ def open_cterr_hmap_from_rs5(main_rs5):
 def main():
     with open('cterr_hmap', 'rb') as f:
         (magic, filename, filesize, u2) = rs5file.parse_rs5file_header(f)
-        assert magic == 'RAW.'
+        assert magic == b'RAW.'
         assert filename == 'cterr_hmap'
         assert u2 == 0
 
@@ -42,7 +42,7 @@ def main():
         abs_mx = 1967.375
         for y in range(h):
             if y & 0xff == 0:
-                print(f'{y}/{h}' % (y, h))
+                print(f'{y}/{h}')
             floats = struct.unpack(f'<{w}f', f.read(4 * w))
             for x in range(w):
                 z = floats[x]

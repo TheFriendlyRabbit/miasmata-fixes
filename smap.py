@@ -21,7 +21,7 @@ def main():
     width = height = 1024
 
     image = Image.new('RGB', (width, height))
-    image = Image.open('Map_FilledIn.jpg').resize((width, height))
+    image = Image.open('Map_FilledIn.png').resize((width, height))
     image = Image.eval(image, lambda x: x / 8)
     pix = image.load()
 

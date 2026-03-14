@@ -5,7 +5,7 @@ import collections
 import os
 import random
 import re
-from io import StringIO
+from io import StringIO, BytesIO
 
 import cterr_hmap
 import environment
@@ -14,6 +14,8 @@ import inst_node
 import rs5archive
 import rs5file
 import rs5mod
+
+from lib import miasutil
 
 # 1: Dumb round robin random mode, all items just selected at random.
 #    Way to easy to find goal items, so not recommended for plants.
@@ -155,8 +157,7 @@ ADDITIONAL_MODELS = {
 
 def find_install_path():
     # FIXME: Query registry / prompt user / GUI like miaspatch
-    if os.path.isfile('miasmata.exe'):
-        return os.curdir
+    return miasutil.find_miasmata_install()
 
 
 def load_main_rs5(install_path, cls=rs5archive.Rs5ArchiveDecoder):
@@ -202,13 +203,11 @@ bad_nodes = []
 
 def dump_bad_nodes():
     try:
-        import miasmap
+        from lib.miasmap import Miasmap
     except Exception as e:
         print('Error importing miasmap, no spoiler maps for you', str(e))
         return
-    tmp = miasmap.image
-    miasmap.image = tmp.copy()
-    miasmap.pix = miasmap.image.load()
+    bad_nodes_map = Miasmap()
     plotted_instance_nodes = set()
     for node, altitude, inst_node_bounds in bad_nodes:
         node_name, node_name_idx, u1, x, y, z, u2, u3, u4, u5, u6 = node
@@ -227,21 +226,20 @@ def dump_bad_nodes():
             # colour = (0,0,128) #+int(z))
             colour = (0, 0, 32 + int(altitude))
         if True:  # Items shown as big fat easy to see square
-            miasmap.plot_square(int(x), int(y), 20, colour)
+            bad_nodes_map.plot_square(int(x), int(y), 20, colour)
         else:  # Items as tiny points
-            miasmap.plot_point(int(x), int(y), (255, 255, 255), colour)
+            bad_nodes_map.plot_point(int(x), int(y), (255, 255, 255), colour)
         if node_idx not in plotted_instance_nodes:  # Also show the XY
             # boundaries of the corresponding instance nodes
             plotted_instance_nodes.add(node_idx)
-            miasmap.plot_rect(int(x1), int(y1), colour, int(x2), int(y2),
+            bad_nodes_map.plot_rect(int(x1), int(y1), colour, int(x2), int(y2),
                               colour)
-    # miasmap.save_image('bad_nodes.png') # Slow, but helps when drawing the
+    # bad_nodes_map.save_image('bad_nodes.png') # Slow, but helps when drawing the
     # instance node bounds
-    miasmap.save_image('bad_nodes.jpg')
-    miasmap.image = tmp
+    bad_nodes_map.save_image('bad_nodes.jpg')
 
 
-class ShuffleBucket(object):
+class ShuffleBucket():
     def __init__(self, shuffle_mode, seed):
         self.shuffle_mode = shuffle_mode
         self.bucket = {}
@@ -251,7 +249,7 @@ class ShuffleBucket(object):
             self.rr_counter = 0
 
 
-class PlantCluster(object):
+class PlantCluster():
     def __init__(self, idx, x, y):
         self.contents = []
         self.x1 = self.x2 = x
@@ -282,10 +280,8 @@ class PlantCluster(object):
 
 
 def spoil(plants, spoiler_filename='spoiler.jpg'):
-    import miasmap
-    tmp = miasmap.image
-    miasmap.image = tmp.copy()
-    miasmap.pix = miasmap.image.load()
+    from lib.miasmap import Miasmap
+    spoiler_map = Miasmap()
 
     install_path = find_install_path()
 
@@ -309,12 +305,12 @@ def spoil(plants, spoiler_filename='spoiler.jpg'):
     points = {}
 
     for inod_fname, compressed_file in main_rs5.items():
-        if compressed_file.type != 'INOD':
+        if compressed_file.type != b'INOD':
             continue
         inod_index = int(inod_fname[9:])  # strip "inst_node" from filename
         assert (inod_fname == 'inst_node%i' % inod_index)
         decompressed = compressed_file.decompress()
-        nodes = inst_node.parse_inod(StringIO(decompressed), inst_node_names)
+        nodes = inst_node.parse_inod(BytesIO(decompressed), inst_node_names)
         for node in nodes:
             node_name, node_name_idx, u1, x, y, z, u2, u3, u4, u5, u6 = node
             try:
@@ -324,13 +320,13 @@ def spoil(plants, spoiler_filename='spoiler.jpg'):
                 pass
     for plant, colour in spoiler_plant_colours.items():
         for x, y in points.get(plant, []):
-            miasmap.plot_square(int(x), int(y), 20, colour, additive=False)
+            spoiler_map.plot_square(int(x), int(y), 20, colour, additive=False)
     # Anything requested without a colour:
     for plant in set(points).difference(spoiler_plant_colours):
         for x, y in points[plant]:
-            miasmap.plot_square(int(x), int(y), 20, (255, 255, 255),
+            spoiler_map.plot_square(int(x), int(y), 20, (255, 255, 255),
                                 additive=False)
-    miasmap.save_image(spoiler_filename)
+    spoiler_map.save_image(spoiler_filename)
 
 
 def remove_previous_randomizer():
@@ -425,7 +421,7 @@ def generate_and_install_randomizer(seed=None):
     item_clusters = {}
     item_ids = {}
     for inod_fname, compressed_file in main_rs5.items():
-        if compressed_file.type != 'INOD':
+        if compressed_file.type != b'INOD':
             continue
         inod_index = int(inod_fname[9:])  # strip "inst_node" from filename
         assert (inod_fname == 'inst_node%i' % inod_index)
@@ -433,7 +429,7 @@ def generate_and_install_randomizer(seed=None):
             print('Skipping blacklisted %s' % inod_fname)
             continue
         decompressed = compressed_file.decompress()
-        nodes = inst_node.parse_inod(StringIO(decompressed), inst_node_names)
+        nodes = inst_node.parse_inod(BytesIO(decompressed), inst_node_names)
         relevant = False
         for node in nodes:
             node_name, node_name_idx, u1, x, y, z, u2, u3, u4, u5, u6 = node
@@ -492,7 +488,7 @@ def generate_and_install_randomizer(seed=None):
             bucket.random.shuffle(valid_note_types)
             note_bucket = (valid_note_types * (
                     len(all_items_in_bucket) // len(valid_note_types) + 1))[
-                          :len(all_items_in_bucket)]
+                :len(all_items_in_bucket)]
             bucket.random.shuffle(note_bucket)
             for item_id in all_items_in_bucket:
                 item_id_map[item_id] = bucket.random.choice(
@@ -543,7 +539,7 @@ def generate_and_install_randomizer(seed=None):
     for inod_fname in relevant_inodes:
         decompressed = main_rs5[inod_fname].decompress()
         nodes = list(
-            inst_node.parse_inod(StringIO(decompressed), inst_node_names))
+            inst_node.parse_inod(BytesIO(decompressed), inst_node_names))
         new_nodes = []
         for node in nodes:
             node_name, node_name_idx, u1, x, y, z, u2, u3, u4, u5, u6 = node
@@ -581,7 +577,8 @@ def generate_and_install_randomizer(seed=None):
     print('Saved %s' % randomizer_filename)
     # print('rs5-extractor.py -f main.rs5 --add-mod %s' % randomizer_filename)
     print('Installing new randomizer to main.rs5...')
-    rs5mod.add_mod('main.rs5', [randomizer_filename])
+    # TODO: use the main.rs5 location specified by the user
+    rs5mod.add_mod(os.path.join(miasutil.find_miasmata_install(), 'main.rs5'), [randomizer_filename])
 
     return seed
 

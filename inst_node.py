@@ -12,15 +12,15 @@ def parse_inod_header(f):
     # if the padding after the filename is consistent with other headers.
     (magic, u1, filename_len, u2, filesize) = struct.unpack('<4s2sB1sI',
                                                             f.read(12))
-    if magic != 'INOD':
+    if magic != b'INOD':
         raise ValueError()
-    assert (u1 == '\0\0')
-    assert (u2 == '\0')
-    filename = f.read(filename_len).rstrip('\0')
+    assert (u1 == b'\0\0')
+    assert (u2 == b'\0')
+    filename = f.read(filename_len).rstrip(b'\0')
     # print>>sys.stderr, 'Parsing INOD %s...' % filename
     pad = (8 - ((12 + filename_len) % 8)) % 8
     # print>>sys.stderr, '%i bytes of padding' % pad
-    assert (f.read(pad) == '\0' * pad)
+    assert (f.read(pad) == b'\0' * pad)
     (num_entries,) = struct.unpack('<I', f.read(4))
     # print>>sys.stderr, '%i entries' % num_entries
     assert (num_entries)
@@ -29,8 +29,8 @@ def parse_inod_header(f):
 
 def enc_inod_header(filename, filesize, num_entries):
     filename_len = len(filename) + 1
-    r = struct.pack('<4s2sB1sI', 'INOD', '\0\0', filename_len, '\0', filesize)
-    r += filename + b'\0'
+    r = struct.pack('<4s2sB1sI', b'INOD', b'\0\0', filename_len, b'\0', filesize)
+    r += filename.encode("utf-8") + b'\0'
     pad = (8 - ((12 + filename_len) % 8)) % 8
     r += b'\0' * pad
     r += struct.pack('<I', num_entries)
@@ -45,15 +45,15 @@ def parse_inod(f, name_list=None):
         (u1, idx, x, y, z, u2, u3, u4, u5, u6) = struct.unpack('<2I5fI2f',
                                                                f.read(4 * 10))
         yield (name_list[idx], idx, u1, x, y, z, u2, u3, u4, u5, u6)
-    assert (f.read(4) == '\0' * 4)
+    assert (f.read(4) == b'\0' * 4)
 
 
 def encode_inod(filename, entries):
-    r = ''
+    r = b''
     for entry in entries:
         _node_name, idx, u1, x, y, z, u2, u3, u4, u5, u6 = entry
         r += struct.pack('<2I5fI2f', u1, idx, x, y, z, u2, u3, u4, u5, u6)
-    r += '\0' * 4
+    r += b'\0' * 4
     h = enc_inod_header(filename, len(r), len(entries))
     return h + r
 
@@ -71,7 +71,7 @@ def encode_inod(filename, entries):
 
 # Search for objects matching a pattern in all nodes:
 def main():
-    import miasmap
+    from lib import miasmap
     nodes = list(map(str.rstrip, open('inst_list', 'r').readlines()))
     filters = sys.argv[1:]
     colours = ((128, 0, 0), (0, 128, 0), (0, 0, 128), (128, 128, 0),

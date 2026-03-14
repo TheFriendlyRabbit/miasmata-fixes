@@ -5,14 +5,15 @@ import struct
 import numpy as np
 from PIL import Image
 
+from lib import miasutil
+
 
 # Documentation:
 # https://en.wikipedia.org/wiki/S3_Texture_Compression
 # http://msdn.microsoft.com/en-us/library/windows/desktop/bb943991(v=vs.85).aspx
 
 class DDSPixelFormat():
-    # http://msdn.microsoft.com/en-us/library/windows/desktop/bb943984(
-    # v=vs.85).aspx
+    # http://msdn.microsoft.com/en-us/library/windows/desktop/bb943984(v=vs.85).aspx
     class Flags():
         ALPHAPIXELS = 0x00001
         ALPHA = 0x00002
@@ -49,8 +50,7 @@ class DDSPixelFormat():
 
 
 class DDSHeader():
-    # http://msdn.microsoft.com/en-us/library/windows/desktop/bb943982(
-    # v=vs.85).aspx
+    # http://msdn.microsoft.com/en-us/library/windows/desktop/bb943982(v=vs.85).aspx
     class Flags():
         # Note: Don't rely on these flags - not all writers set them
         CAPS = 0x000001
@@ -113,7 +113,7 @@ def open_dds(fp, mipmap=None, mode='RGBA'):
         b = (c & 0x001f) << 3
         return np.dstack((r, g, b))
 
-    c = [ [] for _ in range(4) ]
+    c = [[] for _ in range(4)]
     c[0] = buf['c0'].reshape([height // 4, width // 4])
     c[1] = buf['c1'].reshape([height // 4, width // 4])
     ct = (c[0] <= c[1]).reshape([height // 4, width // 4, 1])
@@ -192,22 +192,26 @@ def open_dds(fp, mipmap=None, mode='RGBA'):
 def open_rs5file_imag(file, mipmap=None, mode='RGBA'):
     return open_dds(file['DATA'].get_fp(), mipmap, mode)
 
-def extract_map_filledin():
-    import rs5archive, rs5file
 
+def load_rs5file_imag(file, mipmap=None, mode='RGBA', rs5_dir=None):
+    """
+    Loads a texture from main.rs5.
+    :param file: The name of the texture to load (e.g. "Map_FilledIn" for the map)
+    :ptype file: str
+    :param mipmap: Mipmap of the texture to load (e.g. (1024, 1024) for the map)
+    :ptype mipmap: int tuple
+    :param mode: The color space of the texture. 'RGBA' or 'RGB'.
+    :ptype mode: str
+    :param rs5_dir: (optional) The directory for the rs5 file.
+    :ptype rs5_dir: str
+    """
+    import rs5file
     print('Opening main.rs5...')
-    archive = rs5archive.Rs5ArchiveDecoder(open('main.rs5', 'rb'))
-    print('Extracting image...')
-    file = rs5file.Rs5ChunkedFileDecoder(
-        archive['TEX\\Map_FilledIn'].decompress())
-    print('Decoding image...')
-    image = open_rs5file_imag(file, (1024, 1024), 'RGB')
-    print('Saving image...')
-    image.save('Map_FilledIn.jpg')
-
-
-if __name__ == '__main__':
-    extract_map_filledin()
+    archive = miasutil.load_rs5_file('main.rs5', rs5_dir)
+    print(f'Extracting image {file}...')
+    file_out = rs5file.Rs5ChunkedFileDecoder(archive[f'TEX\\{file}'].decompress())
+    print(f'Decoding image {file}...')
+    return open_rs5file_imag(file_out, mipmap, mode)
 
 
 # vi:noexpandtab:sw=8:ts=8

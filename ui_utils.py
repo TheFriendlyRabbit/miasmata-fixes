@@ -7,6 +7,7 @@ from PySide6.QtWidgets import QMessageBox, QApplication
 
 def catch_error(f):
     import functools
+
     @functools.wraps(f)
     def catch_unhandled_exceptions(*args, **kwargs):
         try:

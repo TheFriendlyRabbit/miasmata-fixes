@@ -9,13 +9,12 @@ from io import BytesIO
 def parse_raw_header(f):  # XXX: Deprecated - use parse_rs5file_header
     (magic, u1, filename_len, u2, filesize) = struct.unpack('<4s2sB1sI',
                                                             f.read(12))
-    if magic != 'RAW.':
+    if magic != b'RAW.':
         raise ValueError()
-    assert u1 == '\0\0'
-    # assert(u2 == '\0')
-    print(f'Parsing RAW {f.read(filename_len).rstrip('\0')}...',
+    assert u1 == b'\0\0'
+    print(f'Parsing RAW {f.read(filename_len).rstrip(b'\0')}...',
           file=sys.stderr)
-    assert f.read(2) == '\0\0'
+    assert f.read(2) == b'\0\0'
     return filesize
 
 
@@ -64,6 +63,8 @@ class Rs5Chunk(object):
     def encode(self):
         header = struct.pack('<4s3sBI4s', self.name.encode("utf-8"), self.u1,
                              int(self.size == 0), self.size, self.u3)
+        if isinstance(self.data, str):
+            self.data = self.data.encode("utf-8")
         return header + self.data + padding(self.size, 8)
 
 

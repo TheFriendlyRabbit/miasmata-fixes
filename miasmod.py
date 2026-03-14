@@ -20,14 +20,14 @@ import time
 from glob import glob
 
 from PySide6 import QtCore, QtGui
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QMessageBox, QApplication, QMainWindow, QTabBar, \
     QFileDialog
-from PySide6.QtCore import Qt
 
 import data
 import environment
 import miasmod_data
-import miasutil
+from lib import miasutil
 import rs5archive
 import rs5mod
 from ui_utils import catch_error
@@ -274,7 +274,7 @@ class Rs5ModListModel(QtCore.QAbstractTableModel):
 
 
 class MiasMod(QMainWindow):
-    from miasmod_ui import Ui_MainWindow
+    from ui.miasmod_ui import Ui_MainWindow
     def __init__(self, parent=None):
         super(MiasMod, self).__init__(parent)
 
@@ -471,7 +471,7 @@ class MiasMod(QMainWindow):
             if 'environment' not in archive:
                 continue
             mod_list.add(path)
-        if len(mod_list) == None:
+        if len(mod_list) is None:
             self.warn_bad_miasmata_path(self.install_path)
 
         # Previously I was shipping communitypatch as an rs5 and I
@@ -598,17 +598,17 @@ class MiasMod(QMainWindow):
             i -= 1
         return (None, None)
 
-    def guess_rs5_source_diffs(self, row, mod, include_cur_row):
+    def guess_rs5_source_diffs(self, row, include_cur_row):
         (diff_base_row, diff_base) = self.find_diff_base(row)
         if diff_base is None:
             return None, []
         ret = diff_base, [x for x in self.mod_list[
-                                     diff_base_row + 1: row + include_cur_row]
+            diff_base_row + 1: row + include_cur_row]
                           if x.include]
         return ret
 
     def ask_generate_mod_diff(self, row, mod, open=True):
-        rs5_base, include_mods = self.guess_rs5_source_diffs(row, mod, False)
+        rs5_base, include_mods = self.guess_rs5_source_diffs(row, False)
         if rs5_base is None:
             return 'edit_rs5'
         sources = [rs5_base.rs5_name] + [x.miasmod_name for x in
@@ -635,7 +635,7 @@ class MiasMod(QMainWindow):
         return self.ask_edit(mod, msg1, msg2, edit_mod, edit_rs5, msg3)
 
     def ask_resolve_mod_sync(self, row, mod):
-        rs5_base, include_mods = self.guess_rs5_source_diffs(row, mod, True)
+        rs5_base, include_mods = self.guess_rs5_source_diffs(row, True)
         if rs5_base is None:
             raise ValueError('No preceding mods found')
         include_mods = [rs5_base.rs5_name] + [x.miasmod_name for x in
@@ -655,8 +655,7 @@ class MiasMod(QMainWindow):
         return self.ask_edit(mod, msg1, msg2, edit_mod, edit_rs5, msg3)
 
     def generate_env_from_diffs(self, row, mod, include_cur_row):
-        rs5_base, include_mods = self.guess_rs5_source_diffs(row, mod,
-                                                             include_cur_row)
+        rs5_base, include_mods = self.guess_rs5_source_diffs(row, include_cur_row)
         env = environment.parse_from_archive(rs5_base.rs5_path)
         for m in include_mods:
             try:
@@ -665,8 +664,7 @@ class MiasMod(QMainWindow):
                 m.note = ('WARNING: Corrupt miasmod file detected!', None)
                 self.ui.mod_list.resizeColumnsToContents()
                 raise
-            else:
-                data.apply_diff(env, diff)
+            data.apply_diff(env, diff)
         return env
 
     def generate_env_from_single_diff(self, row, mod):
@@ -694,7 +692,7 @@ class MiasMod(QMainWindow):
         env1 = self.generate_env_from_diffs(row, mod, True)
         env2 = environment.parse_from_archive(mod.rs5_path)
         if env1 != env2:
-            rs5_base, include_mods = self.guess_rs5_source_diffs(row, mod, True)
+            rs5_base, include_mods = self.guess_rs5_source_diffs(row, True)
             sources = [rs5_base.rs5_name] + [x.miasmod_name for x in
                                              include_mods]
             mod.diff_txt = data.pretty_fmt_diff(data.diff_data(env2, env1),
@@ -764,7 +762,9 @@ class MiasMod(QMainWindow):
         self.done()
 
     def _generate_new_alocalmod(self, row):
-        self.progress('Creating alocalmod...') # AURA TODO: this does not work properly! seemingly, the "alocalmod" rs5 is generated improperly...?
+        self.progress(
+            'Creating alocalmod...')  # AURA TODO: this does not work
+        # properly! seemingly, the "alocalmod" rs5 is generated improperly...?
 
         path = os.path.join(self.install_path, 'alocalmod.miasmod')
         mod = ModList.mod('alocalmod', path, os.path.basename(path), 'miasmod')

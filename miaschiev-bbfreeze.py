@@ -15,7 +15,7 @@ f.setIcon("miasmod.ico")
 f.addScript("miaschiev.pyw", gui_only=True)
 f()
 mkdir("./miaschiev/imageformats")
-copyfile("./miasmod.ico", "./miaschiev/imageformats/miasmod.ico")
+copyfile("resources/miasmod.ico", "./miaschiev/imageformats/miasmod.ico")
 copyfile(getsitepackages()[1] + "\\PySide\\plugins\\imageformats\\qico4.dll",
          "./miaschiev/imageformats/qico4.dll")
 

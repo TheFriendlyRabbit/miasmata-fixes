@@ -5,15 +5,12 @@ import shutil
 import sys
 from shutil import copyfile
 from site import getsitepackages
-from os import mkdir
 
-from miasutil import is_windows
+from lib.miasutil import is_windows
 
 extractor = __import__('rs5-extractor')
 import configparser
 import argparse
-
-import miasutil
 
 binary_patches = ['botanical', '4gb']
 delete = ['communitypatch.rs5']
@@ -34,9 +31,9 @@ args = parser.parse_args()
 
 if args.language is not None:
     if not os.path.isfile(
-            os.path.join('miaspatch_i18n', f'{args.language}.ts')):
+            os.path.join('resources/miaspatch_i18n', f'{args.language}.ts')):
         if not os.path.isfile(
-                os.path.join('miaspatch_i18n', f'{args.language}.qm')):
+                os.path.join('resources/miaspatch_i18n', f'{args.language}.qm')):
             print(f'{args.language} language pack does not exist, exiting!')
             sys.exit(1)
 
@@ -62,7 +59,7 @@ print('Mod order:', order)
 # f()
 if not os.path.isdir("./miaspatch/imageformats"):
     os.makedirs("./miaspatch/imageformats")
-copyfile("./miasmod.ico", "./miaspatch/imageformats/miasmod.ico")
+copyfile("resources/miasmod.ico", "./miaspatch/imageformats/miasmod.ico")
 
 if (is_windows()):
     copyfile(
@@ -82,15 +79,15 @@ for file in args.mods:
     shutil.copyfile(file, dst)
 
 if args.language is not None:
-    dst_dir = os.path.join(args.dest, 'miaspatch_i18n')
+    dst_dir = os.path.join(args.dest, 'resources/miaspatch_i18n')
     if not os.path.isdir(dst_dir):
         os.mkdir(dst_dir)
     if copy_language_src:
-        src = os.path.join('miaspatch_i18n', f'{args.language}.ts')
+        src = os.path.join('resources/miaspatch_i18n', f'{args.language}.ts')
         dst = os.path.join(dst_dir, f'{args.language}.ts')
         if os.path.isfile(src):
             shutil.copyfile(src, dst)
-    src = os.path.join('miaspatch_i18n', f'{args.language}.qm')
+    src = os.path.join('resources/miaspatch_i18n', f'{args.language}.qm')
     dst = os.path.join(dst_dir, f'{args.language}.qm')
     if os.path.isfile(src):
         shutil.copyfile(src, dst)

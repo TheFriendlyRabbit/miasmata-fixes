@@ -257,6 +257,8 @@ class Rs5CentralDirectoryEncoder(Rs5CentralDirectory):
             self.fp.write(ent + pad)
 
 
+# AURA TODO: add entry/exit logic and make all instances of this use "with"
+# rather than open wb and not closing the file object
 class Rs5ArchiveDecoder(Rs5CentralDirectoryDecoder):
     def __init__(self, f):
         self.fp = f
@@ -267,6 +269,14 @@ class Rs5ArchiveDecoder(Rs5CentralDirectoryDecoder):
         (self.d_off, self.ent_len, self.u1) = struct.unpack('<QII', f.read(16))
 
         Rs5CentralDirectoryDecoder.__init__(self)
+
+    def __enter__(self):
+        # Entrance logic here, called before entry of with block
+        pass
+
+    def __exit__(self, exception_type, exception_val, trace):
+        # Exit logic here, called at exit of with block
+        return True
 
 
 class Rs5ArchiveEncoder(Rs5CentralDirectoryEncoder):
@@ -351,7 +361,7 @@ class Rs5ArchiveUpdater(Rs5ArchiveEncoder, Rs5ArchiveDecoder):
         self.fp.seek(0, 2)
 
     def seek_find_hole(self, size):
-        '''Safe fallback version - always seeks to the end of file'''
+        """Safe fallback version - always seeks to the end of file"""
         return self.seek_eof()
 
     def add(self, filename, progress=progress):

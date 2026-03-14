@@ -172,7 +172,8 @@ def overlay_smap(image, shoreline, outline_mask, filledin_mask):
 
 
 def main():
-    import rs5archive, rs5file, data, imag
+    import rs5archive, rs5file, data
+    from lib import imag
     print('Opening saves.dat...')
     saves = open('saves.dat', 'rb')
     print('Procesing saves.dat...')

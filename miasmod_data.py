@@ -405,7 +405,7 @@ class MiasmataDataMixedListModel(MiasmataDataListModel):
 
 
 class MiasmataDataView(QWidget):
-    from miasmod_data_ui import Ui_MiasmataData
+    from ui.miasmod_data_ui import Ui_MiasmataData
 
     saved = QtCore.Signal()
 
@@ -613,8 +613,7 @@ class MiasmataDataView(QWidget):
                                 'Verification pass failed, refusing to write '
                                 'saves.dat!\n\nThis means there is a bug in '
                                 'MiasMod, please report this to '
-                                'DarkStarSword!' \
-                                % (e.__class__.__name__, str(e)))
+                                'DarkStarSword!')
             return
 
         try:

@@ -2,7 +2,6 @@
 
 import json
 import os
-import sys
 
 import rs5archive
 import rs5file
@@ -36,7 +35,7 @@ def progress(percent=None, msg=None):
 
 
 def file_blacklisted(name):
-    '''Files not permitted to be manually added to an archive'''
+    """Files not permitted to be manually added to an archive"""
     if name.upper() in (undo_file, mod_order_file):
         return True
     if name.upper().startswith('%s\\' % mod_manifests):
@@ -200,10 +199,10 @@ def rs5_mods(rs5):
 
 
 def iter_all_file_versions(rs5, undo):
-    '''
+    """
     Iterates over every file in the archive, including multiple versions of
     the same file where a mod has overridden them.
-    '''
+    """
     done = set()
 
     if undo is not None:
@@ -237,11 +236,11 @@ def iter_all_file_versions(rs5, undo):
 
 
 def iter_mod_file_versions(rs5, undo_pos):
-    '''
+    """
     Iterates over every file in the archive that has been added via a mod
     or manually since undo information was added, including multiple
     versions of the same file where multiple mods have touched the same file.
-    '''
+    """
     done = set()
 
     def process(file):
@@ -295,11 +294,11 @@ def iter_used_sections(rs5):
 
 
 def find_eof(rs5):
-    '''
+    """
     Finds the end of the rs5 archive, ensuring that it is past the undo
     metadata, central directory and any installed mods. The archive should
     be safe to truncate at this point.
-    '''
+    """
     return max([x[1] for x in iter_used_sections(rs5)])
 
 
@@ -388,11 +387,11 @@ class Rs5ModArchiveUpdater(rs5archive.Rs5ArchiveUpdater):
 
 
 def apply_mod_order(rs5):
-    '''
+    """
     Rebuild the central directory from the original and any contained mod
     manifests to ensure that files touched by multiple mods use the correct
     one.
-    '''
+    """
     directory = UndoMetaCentralDirectory(rs5)
     for mod in rs5_mods(rs5):
         directory.update(ModCentralDirectoryDecoder(rs5, rs5[mod]))

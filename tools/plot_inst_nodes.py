@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
 import inst_header
-import miasmap
+from lib import miasmap
 
 
 def main():
+    map_obj = miasmap.Miasmap()
     nodes = open('inst_list', 'r').readlines()
     nodes = set([int(x[9:-1]) for x in nodes])
     for (n, (x1, y1, z1, x2, y2, z2)) in inst_header.get_points():
@@ -23,9 +24,8 @@ def main():
         if not n in nodes:
             continue
 
-        inst_header.plot_node(x1, y1, z1, x2, y2, z2)
-
-    miasmap.save_image('all_nodes_exists.jpg')
+        map_obj.plot_node(x1, y1, z1, x2, y2, z2)
+    map_obj.save_image('all_nodes_exists.jpg')
 
 
 if __name__ == '__main__':

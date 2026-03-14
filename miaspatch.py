@@ -8,7 +8,6 @@ import shutil
 import sys
 import time
 from glob import glob
-
 from importlib import import_module
 
 from PySide6 import QtCore, QtGui
@@ -18,7 +17,7 @@ from PySide6.QtWidgets import QApplication, QMessageBox, QDialog, QFileDialog
 import data
 import environment
 import miasmod
-import miasutil
+from lib import miasutil
 import rs5archive
 import rs5mod
 from ui_utils import catch_error, cmp
@@ -165,7 +164,7 @@ class Rs5Mod(Mod):
     def refresh(self, main_rs5=None, **kwargs):
         try:
             mod_info = rs5mod.get_mod_meta(main_rs5, self.mod_name)
-        except KeyError as e:
+        except KeyError:
             return self.update_status(STATUS_NOT_INSTALLED)
         return self.update_status_version(rs5mod.do_get_mod_version(mod_info))
 
@@ -250,7 +249,7 @@ class PatchListModel(QtCore.QAbstractTableModel):
 
 
 class MiasPatch(QDialog):
-    from miaspatch_ui import Ui_Dialog
+    from ui.miaspatch_ui import Ui_Dialog
     def __init__(self, parent=None):
         super(MiasPatch, self).__init__(parent)
 

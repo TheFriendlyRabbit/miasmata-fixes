@@ -2,8 +2,8 @@
 
 import os
 import struct
-
 from mmap import mmap, ACCESS_WRITE, ACCESS_READ
+
 from PySide6.QtWidgets import QApplication
 
 import miaspatch
@@ -86,7 +86,7 @@ def remove_patch(filename, print=print):
 
 
 def check_status(filename):
-    with (open(filename, 'rb') as f):
+    with open(filename, 'rb') as f:
         m = mmap(f.fileno(), 0, access=ACCESS_READ)
         # Get PE header location
         m.seek(0x3c, 0)

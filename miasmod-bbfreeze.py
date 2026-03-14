@@ -12,7 +12,7 @@ f.addScript("miasmod.py", gui_only=True)
 # f.addScript("miasmod.py", gui_only=False)
 f()
 mkdir("./miasmod/imageformats")
-copyfile("./miasmod.ico", "./miasmod/imageformats/miasmod.ico")
+copyfile("resources/miasmod.ico", "./miasmod/imageformats/miasmod.ico")
 copyfile(getsitepackages()[1] + "\\PySide\\plugins\\imageformats\\qico4.dll",
          "./miasmod/imageformats/qico4.dll")
 
