@@ -47,7 +47,7 @@ def get_name_list(f=None):
         names = _get_name_list(f)
     for idx, val in enumerate(names):
         if not isinstance(val, str):
-            names[idx] = val.decode('ascii')
+            names[idx] = val.decode('utf-8')
     return names
 
 # vi:noexpandtab:sw=8:ts=8

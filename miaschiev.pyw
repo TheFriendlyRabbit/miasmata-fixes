@@ -112,8 +112,7 @@ class Miaschiev(QMainWindow):
         del self.ui
 
     def progress(self, msg):
-        print
-        msg
+        print(msg)
         if not hasattr(self, 'busy') or not self.busy:
             QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
         self.busy = True
@@ -123,8 +122,7 @@ class Miaschiev(QMainWindow):
 
     def done(self, msg='Done'):
         if msg != 'Done':
-            print
-            msg
+            print(msg)
         QApplication.restoreOverrideCursor()
         self.busy = False
         self.statusBar().showMessage(msg)

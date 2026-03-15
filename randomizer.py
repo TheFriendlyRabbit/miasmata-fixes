@@ -5,7 +5,7 @@ import collections
 import os
 import random
 import re
-from io import StringIO, BytesIO
+from io import BytesIO
 
 import cterr_hmap
 import environment
@@ -14,7 +14,6 @@ import inst_node
 import rs5archive
 import rs5file
 import rs5mod
-
 from lib import miasutil
 
 # 1: Dumb round robin random mode, all items just selected at random.
@@ -210,12 +209,12 @@ def dump_bad_nodes():
     bad_nodes_map = Miasmap()
     plotted_instance_nodes = set()
     for node, altitude, inst_node_bounds in bad_nodes:
-        node_name, node_name_idx, u1, x, y, z, u2, u3, u4, u5, u6 = node
         (node_idx, (x1, y1, z1, x2, y2, z2)) = inst_node_bounds
-        if z < min_z_blacklist_whole_node:  # Way too far below water,
+        if node.z < min_z_blacklist_whole_node:  # Way too far below water,
             # unreachable
             colour = (255, 0, 0)
-        elif z <= 0:  # Some legitimately below water level, but need to check
+        elif node.z <= 0:  # Some legitimately below water level, but need to
+            # check
             colour = (0, 255, 0)
         elif altitude < -1:
             colour = (64 + int(-altitude), 0, 0)
@@ -226,16 +225,16 @@ def dump_bad_nodes():
             # colour = (0,0,128) #+int(z))
             colour = (0, 0, 32 + int(altitude))
         if True:  # Items shown as big fat easy to see square
-            bad_nodes_map.plot_square(int(x), int(y), 20, colour)
+            bad_nodes_map.plot_square(int(node.x), int(node.y), 20, colour)
         else:  # Items as tiny points
             bad_nodes_map.plot_point(int(x), int(y), (255, 255, 255), colour)
         if node_idx not in plotted_instance_nodes:  # Also show the XY
             # boundaries of the corresponding instance nodes
             plotted_instance_nodes.add(node_idx)
             bad_nodes_map.plot_rect(int(x1), int(y1), colour, int(x2), int(y2),
-                              colour)
-    # bad_nodes_map.save_image('bad_nodes.png') # Slow, but helps when drawing the
-    # instance node bounds
+                                    colour)
+    # bad_nodes_map.save_image('bad_nodes.png') # Slow, but helps when
+    # drawing the instance node bounds
     bad_nodes_map.save_image('bad_nodes.jpg')
 
 
@@ -304,20 +303,14 @@ def spoil(plants, spoiler_filename='spoiler.jpg'):
 
     points = {}
 
-    for inod_fname, compressed_file in main_rs5.items():
-        if compressed_file.type != b'INOD':
-            continue
-        inod_index = int(inod_fname[9:])  # strip "inst_node" from filename
-        assert (inod_fname == 'inst_node%i' % inod_index)
-        decompressed = compressed_file.decompress()
-        nodes = inst_node.parse_inod(BytesIO(decompressed), inst_node_names)
-        for node in nodes:
-            node_name, node_name_idx, u1, x, y, z, u2, u3, u4, u5, u6 = node
-            try:
-                plant = search_inst_ids[node_name_idx]
-                points.setdefault(plant, []).append((int(x), int(y)))
-            except KeyError:
-                pass
+    for inod_fname, inod_index, node in iterate_over_inods(main_rs5,
+                                                           inst_node_names):
+        try:
+            plant = search_inst_ids[node.node_model_idx]
+            points.setdefault(plant, []).append((int(node.x), int(node.y)))
+        except KeyError:
+            pass
+
     for plant, colour in spoiler_plant_colours.items():
         for x, y in points.get(plant, []):
             spoiler_map.plot_square(int(x), int(y), 20, colour, additive=False)
@@ -325,7 +318,7 @@ def spoil(plants, spoiler_filename='spoiler.jpg'):
     for plant in set(points).difference(spoiler_plant_colours):
         for x, y in points[plant]:
             spoiler_map.plot_square(int(x), int(y), 20, (255, 255, 255),
-                                additive=False)
+                                    additive=False)
     spoiler_map.save_image(spoiler_filename)
 
 
@@ -353,6 +346,22 @@ def add_mod_meta(rs5, name, version):
     chunks = rs5file.Rs5ChunkedFileEncoder('META', rs5mod.mod_meta_file, 1,
                                            chunks)
     rs5.add_from_buf(chunks.encode())
+
+
+def iterate_over_inods(main_rs5, inst_node_names, blacklist_inods=None):
+    for inod_fname, compressed_file in main_rs5.items():
+        if compressed_file.type != b'INOD':
+            continue
+        inod_index = int(inod_fname[9:])  # strip "inst_node" from filename
+        assert (inod_fname == 'inst_node%i' % inod_index)
+        if blacklist_inods:
+            if inod_index in blacklist_inods:
+                print('Skipping blacklisted %s' % inod_fname)
+                continue
+        decompressed = compressed_file.decompress()
+        nodes = inst_node.parse_inod(BytesIO(decompressed), inst_node_names)
+        for node in nodes:
+            yield [inod_fname, inod_index, node]
 
 
 def generate_and_install_randomizer(seed=None):
@@ -420,38 +429,32 @@ def generate_and_install_randomizer(seed=None):
     relevant_inodes = []
     item_clusters = {}
     item_ids = {}
-    for inod_fname, compressed_file in main_rs5.items():
-        if compressed_file.type != b'INOD':
+
+    for inod_fname, inod_index, node in iterate_over_inods(main_rs5,
+                                                           inst_node_names,
+                                                           blacklist_inods):
+        # u1 appears to be a unique object ID
+        if node.node_model_idx not in search_inst_ids:
             continue
-        inod_index = int(inod_fname[9:])  # strip "inst_node" from filename
-        assert (inod_fname == 'inst_node%i' % inod_index)
-        if inod_index in blacklist_inods:
-            print('Skipping blacklisted %s' % inod_fname)
-            continue
-        decompressed = compressed_file.decompress()
-        nodes = inst_node.parse_inod(BytesIO(decompressed), inst_node_names)
-        relevant = False
-        for node in nodes:
-            node_name, node_name_idx, u1, x, y, z, u2, u3, u4, u5, u6 = node
-            # u1 appears to be a unique object ID
-            if node_name_idx not in search_inst_ids:
-                continue
-            relevant = True
-            if z < 0:
-                print(
-                    'WARNING: %s located %f below Ocean level' % (node_name, z),
-                    search_inst_ids[node_name_idx],
-                    inod_fname, node)
-            altitude = z - height_map[int(x / 2.0), int(y / 2.0)]
-            if altitude < 0 or altitude > 5:
-                bad_nodes.append((node, altitude, inst_node_bounds[
-                    inod_index]))  # TODO: Only add if actually bad, for now
-                # adding all for testing
-            item_clusters.setdefault(search_inst_ids[node_name_idx], []).append(
-                PlantCluster(u1, x, y))
-            item_ids.setdefault(search_inst_ids[node_name_idx], []).append(u1)
-        if relevant:
-            relevant_inodes.append(inod_fname)
+        relevant_inodes.append(inod_fname)
+        if node.z < 0:
+            print(
+                'WARNING: %s located %f below Ocean level' % (node.node_name,
+                                                              node.z),
+                search_inst_ids[node.node_model_idx],
+                inod_fname, node)
+        altitude = node.z - height_map[int(node.x / 2.0), int(node.y / 2.0)]
+        if altitude < 0 or altitude > 5:
+            bad_nodes.append((node, altitude, inst_node_bounds[
+                inod_index]))  # TODO: Only add if actually bad, for now
+            # adding all for testing
+        item_clusters.setdefault(search_inst_ids[node.node_model_idx],
+                                 []).append(
+            PlantCluster(node.u1, node.x, node.y))
+        item_ids.setdefault(search_inst_ids[node.node_model_idx], []).append(
+            node.u1)
+
+    relevant_inodes = list(set(relevant_inodes))
 
     dump_bad_nodes()
 
@@ -542,32 +545,30 @@ def generate_and_install_randomizer(seed=None):
             inst_node.parse_inod(BytesIO(decompressed), inst_node_names))
         new_nodes = []
         for node in nodes:
-            node_name, node_name_idx, u1, x, y, z, u2, u3, u4, u5, u6 = node
-            if node_name_idx in search_inst_ids:
+            if node.node_model_idx in search_inst_ids:
                 for bucket in shuffle_buckets:
                     if bucket.shuffle_mode == 2:
-                        game_object = models[node_name]
+                        game_object = models[node.node_name]
                         if game_object in bucket.bucket:
-                            node_name_idx = bucket.random.choice(
+                            node.node_model_idx = bucket.random.choice(
                                 bucket.bucket[game_object])
                             # print('SPOILER: Replaced %s with %s' % (
-                            # node_name, inst_node_names[node_name_idx]))
+                            # node_name, inst_node_names[node_model_idx]))
                             # print('DEBUG: Replaced %s with %i' % (
-                            # node_name, node_name_idx)) # Not printing
+                            # node_name, node_model_idx)) # Not printing
                             # replaced name to avoid spoilers. Even printing
                             # ID might be too much...
-                            node_name = '_replaced'  # Not used, just setting
+                            node.node_name = '_replaced'  # Not used, just setting
                             # to avoid confusion
                             break
                     elif bucket.shuffle_mode in (1, 3):
                         # Shuffling happened above, we just apply the
                         # replacements specified in item_id_map.
-                        if u1 in item_id_map:
-                            node_name_idx = item_id_map[u1]
-                            node_name = '_replaced'
+                        if node.u1 in item_id_map:
+                            node.node_model_idx = item_id_map[node.u1]
+                            node.node_name = '_replaced'
                             break
-            new_nodes.append(
-                (node_name, node_name_idx, u1, x, y, z, u2, u3, u4, u5, u6))
+            new_nodes.append(node)
         new_buf = inst_node.encode_inod(inod_fname, new_nodes)
         randomizer_rs5.add_from_buf(new_buf)
     add_mod_meta(randomizer_rs5, randomizer_name, randomizer_version)
@@ -578,7 +579,8 @@ def generate_and_install_randomizer(seed=None):
     # print('rs5-extractor.py -f main.rs5 --add-mod %s' % randomizer_filename)
     print('Installing new randomizer to main.rs5...')
     # TODO: use the main.rs5 location specified by the user
-    rs5mod.add_mod(os.path.join(miasutil.find_miasmata_install(), 'main.rs5'), [randomizer_filename])
+    rs5mod.add_mod(os.path.join(miasutil.find_miasmata_install(), 'main.rs5'),
+                   [randomizer_filename])
 
     return seed
 

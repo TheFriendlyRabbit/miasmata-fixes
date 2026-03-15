@@ -5,6 +5,23 @@ import sys
 
 import inst_header
 
+class Inod():
+    def __init__(self, node_name, node_model_idx, u1, x, y, z, u2, rotz, u4, u5, u6):
+        self.node_name = node_name # name of object- e.g. MushroomClump4a
+        self.node_model_idx = node_model_idx # model index of object - e.g. 457 for plant4
+        self.u1 = u1    # unique identifier?
+        # Keep in mind that the node map is rotated 90 degrees before being
+        # saved as an image file. X and Y are inverted from what you would
+        # normally expect them to be, relative to the map.
+        self.x = x      # position on up-down axis relative to in-game map
+        self.y = y      # position on left-right axis relative to in-game map
+        self.z = z      # position on 3D vertical axis
+        self.u2 = u2    # float, seems to always be 0...??
+        self.rotz = rotz    # z axis rotation in radians
+        self.u4 = u4    # integer, seems to always be 0 or 258...??
+        self.u5 = u5    # float value
+        self.u6 = u6    # float value
+
 
 def parse_inod_header(f):
     # Basically the same as the RAW. header, looks like this is a common
@@ -44,15 +61,14 @@ def parse_inod(f, name_list=None):
     for i in range(num_entries):
         (u1, idx, x, y, z, u2, u3, u4, u5, u6) = struct.unpack('<2I5fI2f',
                                                                f.read(4 * 10))
-        yield (name_list[idx], idx, u1, x, y, z, u2, u3, u4, u5, u6)
+        yield Inod(name_list[idx], idx, u1, x, y, z, u2, u3, u4, u5, u6)
     assert (f.read(4) == b'\0' * 4)
 
 
 def encode_inod(filename, entries):
     r = b''
-    for entry in entries:
-        _node_name, idx, u1, x, y, z, u2, u3, u4, u5, u6 = entry
-        r += struct.pack('<2I5fI2f', u1, idx, x, y, z, u2, u3, u4, u5, u6)
+    for node in entries:
+        r += struct.pack('<2I5fI2f', node.u1, node.node_model_idx, node.x, node.y, node.z, node.u2, node.rotz, node.u4, node.u5, node.u6)
     r += b'\0' * 4
     h = enc_inod_header(filename, len(r), len(entries))
     return h + r
