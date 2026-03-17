@@ -3,7 +3,7 @@
 import os
 import sys
 
-import inst_header
+from lib import inst_header
 from lib.miasmap import Miasmap
 
 

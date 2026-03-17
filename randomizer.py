@@ -9,12 +9,11 @@ from io import BytesIO
 
 import cterr_hmap
 import environment
-import inst_header
 import inst_node
 import rs5archive
 import rs5file
 import rs5mod
-from lib import miasutil
+from lib import miasutil, inst_header
 
 # 1: Dumb round robin random mode, all items just selected at random.
 #    Way to easy to find goal items, so not recommended for plants.

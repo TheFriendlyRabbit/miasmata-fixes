@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-import inst_header
-from lib import miasmap
+from lib import miasmap, inst_header
 
 
 def main():

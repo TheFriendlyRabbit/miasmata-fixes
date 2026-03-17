@@ -30,7 +30,7 @@ import miasmod_data
 from lib import miasutil
 import rs5archive
 import rs5mod
-from ui_utils import catch_error
+from lib.ui_utils import catch_error
 
 
 def conf_path(install_path):

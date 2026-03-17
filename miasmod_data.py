@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QMessageBox, QAbstractItemView, QWidget
 
 import data
 import environment
-from ui_utils import catch_error
+from lib.ui_utils import catch_error
 
 
 def add_undo_data(object):

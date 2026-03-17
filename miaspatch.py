@@ -20,7 +20,7 @@ import miasmod
 from lib import miasutil
 import rs5archive
 import rs5mod
-from ui_utils import catch_error, cmp
+from lib.ui_utils import catch_error, cmp
 
 STATUS_NOT_INSTALLABLE = 0
 STATUS_NOT_INSTALLED = 1
@@ -30,7 +30,7 @@ STATUS_NEWER_VERSION = 4
 STATUS_DESYNC = 5
 
 
-class Mod():
+class Mod:
     installable = False
     install = False
     version = None

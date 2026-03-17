@@ -101,10 +101,10 @@ class data_null(object):
         return b''
 
     def __eq__(self, other):
-        return other is None
+        return isinstance(other, data_null)
 
     def __ne__(self, other):
-        return other is not None
+        return not isinstance(other, data_null)
 
     def __str__(self):
         return '<NULL>'

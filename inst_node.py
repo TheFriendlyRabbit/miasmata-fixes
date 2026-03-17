@@ -3,7 +3,8 @@
 import struct
 import sys
 
-import inst_header
+from lib import inst_header
+
 
 class Inod():
     def __init__(self, node_name, node_model_idx, u1, x, y, z, u2, rotz, u4, u5, u6):
@@ -13,14 +14,14 @@ class Inod():
         # Keep in mind that the node map is rotated 90 degrees before being
         # saved as an image file. X and Y are inverted from what you would
         # normally expect them to be, relative to the map.
-        self.x = x      # position on up-down axis relative to in-game map
-        self.y = y      # position on left-right axis relative to in-game map
-        self.z = z      # position on 3D vertical axis
-        self.u2 = u2    # float, seems to always be 0...??
+        self.x = x          # position on up-down axis relative to in-game map
+        self.y = y          # position on left-right axis relative to in-game map
+        self.z = z          # position on 3D vertical axis
+        self.u2 = u2        # float, seems to always be 0...??
         self.rotz = rotz    # z axis rotation in radians
-        self.u4 = u4    # integer, seems to always be 0 or 258...??
-        self.u5 = u5    # float value
-        self.u6 = u6    # float value
+        self.u4 = u4        # integer, seems to always be 0 or 258...??
+        self.u5 = u5        # float value
+        self.u6 = u6        # float value
 
 
 def parse_inod_header(f):
