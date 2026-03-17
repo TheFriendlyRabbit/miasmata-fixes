@@ -762,9 +762,7 @@ class MiasMod(QMainWindow):
         self.done()
 
     def _generate_new_alocalmod(self, row):
-        self.progress(
-            'Creating alocalmod...')  # AURA TODO: this does not work
-        # properly! seemingly, the "alocalmod" rs5 is generated improperly...?
+        self.progress('Creating alocalmod...')
 
         path = os.path.join(self.install_path, 'alocalmod.miasmod')
         mod = ModList.mod('alocalmod', path, os.path.basename(path), 'miasmod')
@@ -902,8 +900,7 @@ def start_gui_process(pipe=None):
     global app
 
     # HACK TO WORK AROUND CRASH ON CONSOLE OUTPUT WITH BBFREEZE GUI_ONLY
-    # aura: re-enable me!
-    # sys.stdout = sys.stderr = open('miasmod.log', 'a', encoding="UTF-8")
+    sys.stdout = sys.stderr = open('miasmod.log', 'a', encoding="UTF-8")
     print(time.asctime())
 
     # Try to get some more useful info on crashes:

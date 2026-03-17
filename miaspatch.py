@@ -731,8 +731,7 @@ def start_gui_process(pipe=None):
     global config
 
     # HACK TO WORK AROUND CRASH ON CONSOLE OUTPUT WITH BBFREEZE GUI_ONLY
-    # aura: re-enable me!!
-    # sys.stdout = sys.stderr = open('miaspatch.log', 'a', encoding="UTF-8")
+    sys.stdout = sys.stderr = open('miaspatch.log', 'a', encoding="UTF-8")
     print(time.asctime())
 
     # Try to get some more useful info on crashes:
