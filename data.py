@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+import binascii
 import collections
 import itertools
 import json
@@ -536,20 +537,20 @@ class DataRaw():
         return DataInt(len(self.raw)).enc() + self.raw
 
     def to_json(self):
-        return self.raw.encode('hex_codec')
+        return self.raw.hex()
 
     def from_json(self, l):
-        self.raw = l.decode('hex_codec')
+        self.raw = binascii.a2b_hex(l)
 
     def summary(self):
         r = self.raw[:32]
-        ret = ' '.join(['%.2x' % ord(x) for x in r])
+        ret = ' '.join(['%.2x' % x for x in r])
         if r == self.raw:
             return ret
         return ret + '...'
 
     def __str__(self):
-        return ' '.join(['%.2x' % ord(x) for x in self.raw])
+        return ' '.join(['%.2x' % x for x in self.raw])
 
     def __eq__(self, other):
         if not isinstance(other, DataRaw):

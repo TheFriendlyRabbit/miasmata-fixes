@@ -494,9 +494,9 @@ class MiasMod(QMainWindow):
 
     @QtCore.Slot()
     @catch_error
-    def dataChanged(self, topLeft, bottomRight):
+    def dataChanged(self, topLeft, bottomRight, roles=list()):
         mod_states = {mod.name: mod.include for mod in self.mod_list}
-        json.dump(mod_states, open(self.conf_path, 'wb'), ensure_ascii=True)
+        json.dump(mod_states, open(self.conf_path, 'w'), ensure_ascii=True)
         # TODO: Delay this somehow, synchronise all following rs5s...
         self.synchronise_alocalmod()
 

@@ -309,7 +309,7 @@ class MiasPatch(QDialog):
 
     @QtCore.Slot()
     @catch_error
-    def dataChanged(self, topLeft, bottomRight, arg):
+    def dataChanged(self, topLeft, bottomRight, roles=list()):
         self.update_install_button()
 
     def enumerate_rs5mod(self):

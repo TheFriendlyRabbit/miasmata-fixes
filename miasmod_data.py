@@ -3,7 +3,9 @@ import sys
 
 from PySide6 import QtCore, QtGui
 from PySide6.QtCore import Qt, QItemSelectionModel, QSortFilterProxyModel
-from PySide6.QtWidgets import QMessageBox, QAbstractItemView, QWidget
+from PySide6.QtWidgets import QMessageBox, QAbstractItemView, QWidget, QDialog, \
+    QVBoxLayout, QPlainTextEdit
+from nuitka.build.inline_copy.stubgen.six import BytesIO
 
 import data
 import environment
@@ -50,7 +52,7 @@ def filter_cp1252(string):
         return not f(c)
 
     bad = illegal = None
-    new = string.__class__(list(filter(f, string)))
+    new = ''.join(list(filter(f, string)))
     if string != new:
         bad = string
         illegal = string.__class__(list(filter(nf, string)))
@@ -283,7 +285,7 @@ class MiasmataDataSortProxy(QSortFilterProxyModel):
         if not sourceParent.isValid():
             # Don't ever filter out the root node
             return True
-        s = self.filterRegExp().pattern().lower()
+        s = self.filterRegularExpression().pattern().lower()
         if not s:
             return True
         index = self.sourceModel().index(sourceRow, 0, sourceParent)
@@ -529,7 +531,7 @@ class MiasmataDataView(QWidget):
 
         if isinstance(node, data.DataRaw):
             lines = [node.raw[x:x + 8] for x in range(0, len(node.raw), 8)]
-            lines = [' '.join(['%.2x' % ord(x) for x in line]) for line in
+            lines = [' '.join(['%.2x' % x for x in line]) for line in
                      lines]
             self.ui.value_hex.setPlainText('\n'.join(lines))
             self.ui.value_hex.setVisible(True)
@@ -569,12 +571,12 @@ class MiasmataDataView(QWidget):
 
     @QtCore.Slot()
     @catch_error
-    def dataChanged(self, topLeft, bottomRight):
+    def dataChanged(self, topLeft, bottomRight, roles=list()):
         return self.update_view(topLeft, self.cur_node)
 
     @QtCore.Slot()
     @catch_error
-    def underlyingDataChanged(self, topLeft, bottomRight):
+    def underlyingDataChanged(self, topLeft, bottomRight, roles):
         self.ui.save.setEnabled(True)
 
     @QtCore.Slot()
@@ -592,7 +594,7 @@ class MiasmataDataView(QWidget):
         json1 = StringIO()
         json2 = StringIO()
         data.dump_json(self.root, json1)
-        data.data2json(StringIO(encoded), json2)
+        data.data2json(BytesIO(encoded), json2)
         return json1.getvalue() == json2.getvalue()
 
     def write_saves_dat(self):
@@ -699,12 +701,12 @@ class MiasmataDataView(QWidget):
         diff = data.diff_data(self.diff_base, self.root)
         txt = data.pretty_fmt_diff(diff)
 
-        dialog = QtGui.QDialog()
+        dialog = QDialog()
         dialog.resize(600, 800)
         dialog.setWindowTitle('MiasMod')
-        layout = QtGui.QVBoxLayout(dialog)
+        layout = QVBoxLayout(dialog)
         # dialog.setText(self.root.name)
-        txtbox = QtGui.QPlainTextEdit(dialog)
+        txtbox = QPlainTextEdit(dialog)
         txtbox.setReadOnly(True)
         txtbox.setPlainText(txt)
         layout.addWidget(txtbox)
@@ -724,7 +726,7 @@ class MiasmataDataView(QWidget):
     def on_clear_search_clicked(self):
         selection = self.selection_model.currentIndex()
         selection = self.sort_proxy.mapToSource(selection)
-        self.sort_proxy.reset()
+        self.sort_proxy.revert()
         self.ui.treeView.expandToDepth(0)
         self.sort_proxy.setFilterFixedString(None)
         selection = self.sort_proxy.mapFromSource(selection)

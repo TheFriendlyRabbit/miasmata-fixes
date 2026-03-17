@@ -1,0 +1,3 @@
+[MAIN]
+# Allows Pylint to see Qt methods.
+extension-pkg-allow-list=PySide6
