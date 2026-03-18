@@ -128,13 +128,6 @@ on the game map.
 _Currently it requires certain files to have already been extracted into
 specific locations - TODO is the ability to read them directly from main.rs5._
 
-### cterr_hmap.py ###
-
-This script generates a heightmap of the game's map
-
-_Currently it requires certain files to have already been extracted into
-specific locations - TODO is the ability to read them directly from main.rs5._
-
 ### exposure_map.py ###
 
 This script decodes the exposure map field from a saved game & overlays the

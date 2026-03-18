@@ -4,6 +4,7 @@ import os
 
 import rs5archive
 
+
 def is_windows():
     """
     Returns ``True`` if the system is Windows, ``False`` otherwise.

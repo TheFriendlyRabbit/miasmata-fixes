@@ -17,11 +17,11 @@ class Inod():
         self.x = x          # position on up-down axis relative to in-game map
         self.y = y          # position on left-right axis relative to in-game map
         self.z = z          # position on 3D vertical axis
-        self.u2 = u2        # float, seems to always be 0...??
-        self.rotz = rotz    # z axis rotation in radians
-        self.u4 = u4        # integer, seems to always be 0 or 258...??
-        self.u5 = u5        # float value
-        self.u6 = u6        # float value
+        self.u2 = u2        # float(?) seems to always be 0...??
+        self.rotz = rotz    # z axis rotation in radians (confirmed)
+        self.u4 = u4        # integer(?) seems to always be 0 or 258...??
+        self.u5 = u5        # x rotation, according to klightspeed's documentation?
+        self.u6 = u6        # y rotation, according to klightspeed's documentation?
 
 
 def parse_inod_header(f):

@@ -5,7 +5,7 @@ import sys
 
 from PIL import Image
 
-from lib import imag, miasutil
+from lib import imag
 
 MINZ = -1815
 MAXZ = 1833

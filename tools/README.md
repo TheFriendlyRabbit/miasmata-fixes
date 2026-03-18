@@ -5,6 +5,12 @@ This directory contains miscellaneous standalone tools to aid in the parsing and
 
 The files in this directory are not used by any other scripts in the repository.
 
+extractors.py
+---------
+Extracts a variety of assets from the game into human-readable formats:
+- Exports the game's height map, ``cterr_hmap``, as an image
+
+
 interpret.py
 ---------
 A script to help analyze unknown data in different formats.

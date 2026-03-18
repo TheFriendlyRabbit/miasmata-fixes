@@ -3,7 +3,6 @@
 import io
 import struct
 
-from lib import miasmap
 import rs5file
 
 

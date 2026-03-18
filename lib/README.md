@@ -2,6 +2,9 @@ Miasmod Library Files
 ==============
 This directory contains miscellaneous files that contain helper functions for other scripts.
 
+cterr_hmap.py
+--------
+Contains functions for reading and manipulating data from the game's ``cterr_hamp`` file, which is used to store the height map for the island.
 
 imag.py
 ---------
