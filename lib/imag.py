@@ -100,7 +100,12 @@ def open_dds(fp, mipmap=None, mode='RGBA'):
         fmt = [('alpha', '<u8'), ('c0', '<u2'), ('c1', '<u2'),
                ('clookup', '<u4')]
 
-    (width, height) = (header.width, header.height)
+    # Base width and height of the image
+    width, height = header.width, header.height
+
+    # Number of 4x4 pixel squares along the height and width of the image
+    h_count, w_count = height // 4, width // 4
+
     if mipmap:
         while mipmap < (width, height):
             fp.seek(width * height * block_size // 16, 1)
@@ -115,26 +120,27 @@ def open_dds(fp, mipmap=None, mode='RGBA'):
         b = (c & 0x001f) << 3
         return np.dstack((r, g, b))
 
-    colors = [[] for _ in range(4)]
-    colors[0] = buf['c0'].reshape([height // 4, width // 4])
-    colors[1] = buf['c1'].reshape([height // 4, width // 4])
-    ct = (colors[0] <= colors[1]).reshape([height // 4, width // 4, 1])
-    colors[0] = rgb565(colors[0])
-    colors[1] = rgb565(colors[1])
-    colors[2] = np.choose(ct, ((2 * colors[0] + colors[1]) / 3, (colors[0] + colors[1]) / 2))
-    colors[3] = np.choose(ct, ((colors[0] + 2 * colors[1]) / 3, np.zeros_like(colors[0])))
+    c0 = buf['c0'].reshape([h_count, w_count])
+    c1 = buf['c1'].reshape([h_count, w_count])
+    ct = (c0 <= c1).reshape([h_count, w_count, 1])
+
+    np_cols = np.empty([4, h_count, w_count, 3], np.uint16)
+    np_cols[0] = rgb565(c0)
+    np_cols[1] = rgb565(c1)
+    np_cols[2] = np.choose(ct, ((2 * np_cols[0] + np_cols[1]) / 3, (np_cols[0] + np_cols[1]) / 2))
+    np_cols[3] = np.choose(ct, ((np_cols[0] + 2 * np_cols[1]) / 3, 0))
     del ct
-    cl = buf['clookup'].reshape([height // 4, width // 4, 1])
+    cl = buf['clookup'].reshape([h_count, w_count, 1])
 
     channels = 3
     if header.pixel_format.four_cc == b'DXT5' and mode == 'RGBA':
         channels = 4
-        alpha = buf['alpha'].reshape(height // 4, width // 4)
-        a = [[] for _ in range(8)]
-        aa = [[] for _ in range(8)]
-        ab = [[] for _ in range(8)]
+        alpha = buf['alpha'].reshape(h_count, w_count)
+        a = np.empty([8, h_count, w_count], dtype=np.uint64)
+        aa = np.empty([8, h_count, w_count], dtype=np.uint64)
+        ab = np.empty([8, h_count, w_count], dtype=np.uint64)
         # Byte swapped due to reading in LE
-        al = ((alpha & 0xffffffffffff0000) >> 16).reshape([height // 4, width // 4, 1])
+        al = ((alpha & 0xffffffffffff0000) >> 16).reshape([h_count, w_count, 1])
         a[0] = alpha & 0xff
         a[1] = (alpha & 0xff00) >> 8
         at = a[0] <= a[1]
@@ -142,9 +148,8 @@ def open_dds(fp, mipmap=None, mode='RGBA'):
             aa[i + 1] = ((7 - i) * a[0] + i * a[1]) / 7
         for i in range(1, 5):
             ab[i + 1] = ((5 - i) * a[0] + i * a[1]) / 5
-        ab[6] = np.zeros_like(a[0])
-        ab[7] = np.empty_like(a[0])
-        ab[7].fill(255)
+        ab[6] = np.zeros_like(a[0], dtype=np.uint64)
+        ab[7] = np.full_like(a[0], 255, dtype=np.uint64)
         for i in range(2, 8):
             a[i] = np.choose(at, [aa[i], ab[i]])
         del aa, ab, at
@@ -153,34 +158,27 @@ def open_dds(fp, mipmap=None, mode='RGBA'):
 
     # Parse the packed CLUT into a set of 16 2-bit color lookup tables,
     # then swap the lookup indices for actual colors via np.choose
-    cl = np.choose((cl >> BIT_SHIFT_ARR & 0x3).transpose(2, 0, 1).reshape(16, height // 4, width // 4, 1), colors)
+    cl = np.choose((cl >> BIT_SHIFT_ARR & 0x3).transpose(2, 0, 1).reshape(16, h_count, w_count, 1), np_cols)
 
     # Do the same with the alpha lookup table, if present, and append the
     # alpha channel to the color array.
     if channels == 4:
-        al = np.choose(np.uint8(al >> ALPHA_SHIFT_ARR & 0x7).transpose(2, 0, 1), a)
-        cl = np.insert(cl, 3, al, 3)
+        cl = np.insert(cl, 3, np.choose(np.uint8(al >> ALPHA_SHIFT_ARR & 0x7).transpose(2, 0, 1), a), 3)
 
+    # Copy the pixels to the target image.
+    # Envision a 4x4 pixel grid. Each of the following 16 iterations corresponds
+    # to an x,y coordinate in that pixel grid. If that pixel grid is tiled
+    # across the entire image, that represents the pixels which are filled
+    # in each iteration of this loop.
     idx = 0
-
     for y in range(4):
         for x in range(4):
-            # Construct a mask of the pixels in the final image we are
-            # working on:
-            mask = np.zeros([4, 4, channels])
-            mask[y, x] = [1] * channels
-            mask = np.tile(mask, [height // 4, width // 4, 1])
-
-            # Copy these pixels to the output image - this is the slowest
-            # operation:
-            np.place(out, mask, cl[idx])
-
+            out[y::4,x::4,:] = cl[idx]
             idx += 1
 
     # Finally cast to uint8 here - too early causes overflows in the DXT
     # calculations and any time after that actually slows things down
     image = Image.fromarray(np.array(out, np.uint8))
-
     return image
 
 

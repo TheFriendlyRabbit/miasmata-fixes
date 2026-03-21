@@ -15,8 +15,8 @@ def extract_all():
     print("Loading main.rs5...")
     main_rs5 = miasutil.load_rs5_file('main.rs5')
     print("Extracting images...")
-    imag.load_rs5file_imag("Map_FilledIn", (2048, 2048), 'RGB', archive=main_rs5).save("Map_FilledIn.png")
-    imag.load_rs5file_imag("Coulise_Leafy1Transparent", (2048, 2048), 'RGBA', archive=main_rs5).save("alpha_test.png")
+    imag.load_rs5file_imag("Map_FilledIn", mode='RGB', archive=main_rs5).save("Map_FilledIn.png")
+    imag.load_rs5file_imag("Coulise_Leafy1Transparent", mode='RGBA', archive=main_rs5).save("alpha_test.png")
     print("Extracting height map...")
     cterr_hmap.hmap_to_image(main_rs5).save('cterr_hmap.png')
     # It seems that player_map_achievements is the only SMAP file in the game.
