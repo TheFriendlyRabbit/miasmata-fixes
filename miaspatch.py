@@ -17,9 +17,7 @@ from PySide6.QtWidgets import QApplication, QMessageBox, QDialog, QFileDialog
 import data
 import environment
 import miasmod
-import rs5archive
-import rs5mod
-from lib import miasutil
+from lib import miasutil, rs5archive, rs5mod
 from lib.ui_utils import catch_error, cmp
 
 STATUS_NOT_INSTALLABLE = 0

@@ -8,7 +8,7 @@ import json
 import struct
 import sys
 
-import rs5file
+from lib import rs5file
 
 data_types = collections.OrderedDict()
 json_decoders = {}

@@ -2,7 +2,7 @@
 
 import os
 
-import rs5archive
+from lib import rs5archive
 
 
 def is_windows():

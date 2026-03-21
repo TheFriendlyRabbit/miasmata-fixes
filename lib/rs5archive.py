@@ -24,7 +24,7 @@ import struct
 import sys
 import zlib
 
-import rs5file
+from lib import rs5file
 
 chunk_extensions = {
     ('IMAG', 'DATA'): '.dds',

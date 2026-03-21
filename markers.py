@@ -3,7 +3,7 @@
 import struct
 import sys
 
-import rs5file
+from lib import rs5file
 
 
 def parse_nlst_header(f):

@@ -3,8 +3,7 @@
 import sys
 
 import data
-import rs5archive
-import rs5file
+from lib import rs5archive, rs5file
 
 
 def get_env_chunk(f):

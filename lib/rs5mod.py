@@ -3,8 +3,7 @@
 import json
 import os
 
-import rs5archive
-import rs5file
+from lib import rs5archive, rs5file
 
 try:
     from PySide6 import QtCore

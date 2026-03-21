@@ -150,7 +150,7 @@ def gen_map(exposure, filledin, overlayinfo):
 
 
 def overlay_smap(image, shoreline, outline_mask, filledin_mask):
-    import smap
+    from lib import smap
     revealed = 0
     pix = image.load()
     outline_pix = outline_mask.load()
@@ -172,7 +172,9 @@ def overlay_smap(image, shoreline, outline_mask, filledin_mask):
 
 
 def main():
-    import rs5archive, rs5file, data
+    import data
+    from lib import rs5file
+    from lib import rs5archive
     from lib import imag
     print('Opening saves.dat...')
     saves = open('saves.dat', 'rb')

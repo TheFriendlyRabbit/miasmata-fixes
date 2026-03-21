@@ -5,7 +5,7 @@ import struct
 import numpy as np
 from PIL import Image
 
-from lib import miasutil
+from lib import miasutil, rs5file
 
 
 # Documentation:
@@ -14,7 +14,7 @@ from lib import miasutil
 
 class DDSPixelFormat():
     # http://msdn.microsoft.com/en-us/library/windows/desktop/bb943984(v=vs.85).aspx
-    class Flags():
+    class Flags:
         ALPHAPIXELS = 0x00001
         ALPHA = 0x00002
         FOURCC = 0x00004
@@ -49,7 +49,7 @@ class DDSPixelFormat():
         assert not self.flags & self.Flags.LUMINANCE  # old file
 
 
-class DDSHeader():
+class DDSHeader:
     # http://msdn.microsoft.com/en-us/library/windows/desktop/bb943982(v=vs.85).aspx
     class Flags():
         # Note: Don't rely on these flags - not all writers set them
@@ -83,6 +83,8 @@ class DDSHeader():
         assert size == 124
         assert self.flags & self.Flags.REQUIRED == self.Flags.REQUIRED
 
+BIT_SHIFT_ARR = np.array([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30],dtype=np.uint8)
+ALPHA_SHIFT_ARR = np.array([0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45],dtype=np.uint8)
 
 def open_dds(fp, mipmap=None, mode='RGBA'):
     if fp.read(4) != b'DDS ':
@@ -113,27 +115,26 @@ def open_dds(fp, mipmap=None, mode='RGBA'):
         b = (c & 0x001f) << 3
         return np.dstack((r, g, b))
 
-    c = [[] for _ in range(4)]
-    c[0] = buf['c0'].reshape([height // 4, width // 4])
-    c[1] = buf['c1'].reshape([height // 4, width // 4])
-    ct = (c[0] <= c[1]).reshape([height // 4, width // 4, 1])
-    c[0] = rgb565(c[0])
-    c[1] = rgb565(c[1])
-    c[2] = np.choose(ct, ((2 * c[0] + c[1]) / 3, (c[0] + c[1]) / 2))
-    c[3] = np.choose(ct, ((c[0] + 2 * c[1]) / 3, np.zeros_like(c[0])))
+    colors = [[] for _ in range(4)]
+    colors[0] = buf['c0'].reshape([height // 4, width // 4])
+    colors[1] = buf['c1'].reshape([height // 4, width // 4])
+    ct = (colors[0] <= colors[1]).reshape([height // 4, width // 4, 1])
+    colors[0] = rgb565(colors[0])
+    colors[1] = rgb565(colors[1])
+    colors[2] = np.choose(ct, ((2 * colors[0] + colors[1]) / 3, (colors[0] + colors[1]) / 2))
+    colors[3] = np.choose(ct, ((colors[0] + 2 * colors[1]) / 3, np.zeros_like(colors[0])))
     del ct
-    cl = buf['clookup'].reshape([height // 4, width // 4, 1]).copy()
+    cl = buf['clookup'].reshape([height // 4, width // 4, 1])
 
-    alpha = None
     channels = 3
     if header.pixel_format.four_cc == b'DXT5' and mode == 'RGBA':
         channels = 4
-        alpha = buf['alpha'].reshape(height / 4, width / 4)
-        a = [] * 8
-        aa = [] * 8
-        ab = [] * 8
+        alpha = buf['alpha'].reshape(height // 4, width // 4)
+        a = [[] for _ in range(8)]
+        aa = [[] for _ in range(8)]
+        ab = [[] for _ in range(8)]
         # Byte swapped due to reading in LE
-        al = (alpha & 0xffffffffffff0000) >> 16
+        al = ((alpha & 0xffffffffffff0000) >> 16).reshape([height // 4, width // 4, 1])
         a[0] = alpha & 0xff
         a[1] = (alpha & 0xff00) >> 8
         at = a[0] <= a[1]
@@ -149,38 +150,32 @@ def open_dds(fp, mipmap=None, mode='RGBA'):
         del aa, ab, at
 
     out = np.empty([height, width, channels], np.float64)
+
+    # Parse the packed CLUT into a set of 16 2-bit color lookup tables,
+    # then swap the lookup indices for actual colors via np.choose
+    cl = np.choose((cl >> BIT_SHIFT_ARR & 0x3).transpose(2, 0, 1).reshape(16, height // 4, width // 4, 1), colors)
+
+    # Do the same with the alpha lookup table, if present, and append the
+    # alpha channel to the color array.
+    if channels == 4:
+        al = np.choose(np.uint8(al >> ALPHA_SHIFT_ARR & 0x7).transpose(2, 0, 1), a)
+        cl = np.insert(cl, 3, al, 3)
+
+    idx = 0
+
     for y in range(4):
         for x in range(4):
-            # print y, x
-
-            # I feel like there's probably a more efficient way to do this...
-
-            # Look up the value
-            l = np.int32(cl & 0x3)
-            cl >>= 2
-
-            # Lookup the value of each of the pixels we are working on:
-            o = np.choose(l, c)
-
-            if channels == 4:
-                l = np.uint8(al & 0x7)
-                al >>= 3
-
-                oa = np.choose(l, a)
-                o = np.insert(o, 3, oa, 2)
-
-            # Enlarge that 4x in both directions:
-            o = o.repeat(4, 0).repeat(4, 1)
-
             # Construct a mask of the pixels in the final image we are
             # working on:
-            m = np.zeros([4, 4, channels])
-            m[y, x] = [1] * channels
-            m = np.tile(m, [height // 4, width // 4, 1])
+            mask = np.zeros([4, 4, channels])
+            mask[y, x] = [1] * channels
+            mask = np.tile(mask, [height // 4, width // 4, 1])
 
             # Copy these pixels to the output image - this is the slowest
             # operation:
-            np.putmask(out, m, o)
+            np.place(out, mask, cl[idx])
+
+            idx += 1
 
     # Finally cast to uint8 here - too early causes overflows in the DXT
     # calculations and any time after that actually slows things down
@@ -193,7 +188,7 @@ def open_rs5file_imag(file, mipmap=None, mode='RGBA'):
     return open_dds(file['DATA'].get_fp(), mipmap, mode)
 
 
-def load_rs5file_imag(file, mipmap=None, mode='RGBA', rs5_dir=None):
+def load_rs5file_imag(file, mipmap=None, mode='RGBA', rs5_dir=None, archive=None):
     """
     Loads a texture from main.rs5.
     :param file: The name of the texture to load (e.g. "Map_FilledIn" for the map)
@@ -204,10 +199,14 @@ def load_rs5file_imag(file, mipmap=None, mode='RGBA', rs5_dir=None):
     :ptype mode: str
     :param rs5_dir: (optional) The directory for the rs5 file.
     :ptype rs5_dir: str
+    :param archive: (optional) An already-loaded rs5 file.
+    :ptype archive: ``Rs5ArchiveDecoder``
+    :return: A PIL ``Image`` containing the loaded texture.
+    :rtype: ``PIL.Image``
     """
-    import rs5file
-    print('Opening main.rs5...')
-    archive = miasutil.load_rs5_file('main.rs5', rs5_dir)
+    if not archive:
+        print('Opening main.rs5...')
+        archive = miasutil.load_rs5_file('main.rs5', rs5_dir)
     print(f'Extracting image {file}...')
     file_out = rs5file.Rs5ChunkedFileDecoder(archive[f'TEX\\{file}'].decompress())
     print(f'Decoding image {file}...')

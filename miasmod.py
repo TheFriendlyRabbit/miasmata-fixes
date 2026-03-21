@@ -27,9 +27,7 @@ from PySide6.QtWidgets import QMessageBox, QApplication, QMainWindow, QTabBar, \
 import data
 import environment
 import miasmod_data
-import rs5archive
-import rs5mod
-from lib import miasutil
+from lib import miasutil, rs5archive, rs5mod
 from lib.ui_utils import catch_error
 
 

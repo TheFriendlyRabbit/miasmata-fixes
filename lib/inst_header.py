@@ -3,7 +3,7 @@
 import io
 import struct
 
-import rs5file
+from lib import rs5file
 
 
 def parse_inst_header_header(f):

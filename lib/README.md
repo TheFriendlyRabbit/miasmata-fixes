@@ -25,6 +25,13 @@ miasutil.py
 ---------
 Contains helper functions related to cross-platform locating and loading of Miasmata's game files and save files.
 
+smap.py
+---------
+
+Functions for decoding SMAP type files, and overlaying them on the game map image.
+
+(The only known SMAP file is ``player_map_achievements``, which encodes the shoreline data for the achievement "The Bored Cartographer".)
+
 
 ui_utils.py
 ---------

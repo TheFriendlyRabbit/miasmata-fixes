@@ -15,7 +15,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QLabel
 import data
 import exposure_map
 import markers
-from lib import miasutil, imag
+from lib import miasutil, imag, smap, rs5file
 from lib.miasmap import Miasmap
 from ui.miaschiev_ui import Ui_Miaschiev
 
@@ -128,13 +128,13 @@ class Miaschiev(QMainWindow):
         self.statusBar().showMessage(msg)
 
     def process_install_path(self, path):
-        import rs5file, environment
+        import environment
 
         self.progress('Loading main.rs5...')
         self.rs5main = miasutil.load_rs5_file('main.rs5', path)
 
-        self.filledin = imag.load_rs5file_imag("Map_FilledIn", (1024, 1024), 'RGB', path)
-        self.overlayinfo = imag.load_rs5file_imag("Map_OverlayInfo", (1024, 1024), 'RGB', path)
+        self.filledin = imag.load_rs5file_imag("Map_FilledIn", (1024, 1024), 'RGB', archive=self.rs5main)
+        self.overlayinfo = imag.load_rs5file_imag("Map_OverlayInfo", (1024, 1024), 'RGB', archive=self.rs5main)
 
         self.progress('Extracting markers...')
         self.markers = rs5file.Rs5ChunkedFileDecoder(
@@ -248,7 +248,6 @@ class Miaschiev(QMainWindow):
         self.show_coast()
 
     def coast_progress(self):
-        import rs5file, smap
 
         self.progress(
             'Extracting player_map_achievements...')  # XXX: Also in
@@ -260,7 +259,7 @@ class Miaschiev(QMainWindow):
         filledin_pix = self.filledin_mask.load()
 
         for (total, (x, y)) in enumerate(
-                smap.smap_iter(self.shoreline, self.map.size[0]), 1):
+                smap.smap_iter(self.shoreline), 1):
             if filledin_pix[x, y]:
                 revealed += 1
 

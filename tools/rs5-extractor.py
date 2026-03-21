@@ -1,12 +1,13 @@
 #!/usr/bin/env python
+"""
+To run: ``python -m tools.rs5-extractor [args]``
+"""
 
 import os
 import sys
 import zlib
 
-import rs5archive
-import rs5file
-import rs5mod
+from lib import rs5archive, rs5mod, rs5file
 
 
 def list_files(archive, file_list, list_chunks=False, sha=False):
@@ -24,8 +25,8 @@ def list_files(archive, file_list, list_chunks=False, sha=False):
             continue
         if sha:
             print('%s -' % hashlib.sha1(file.read()).hexdigest(), end=' ')
-        print('%4s %8i %s' % (file.type, file.uncompressed_size, file.filename))
-        if list_chunks and file.type not in ('PROF', 'INOD', 'FOGN'):
+        print('%4s %8i %s' % (file.type.decode("ascii"), file.uncompressed_size, file.filename))
+        if list_chunks and file.type not in (b'PROF', b'INOD', b'FOGN'):
             try:
                 chunks = rs5file.rs5_file_decoder_factory(file.decompress())
             except zlib.error as e:
@@ -49,7 +50,7 @@ def extract(archive, dest, file_list, strip, chunks, overwrite, filter):
         if filename not in rs5:
             print(f'{filename} not found in {archive}!')
             continue
-        type = rs5[filename].type
+        type = rs5[filename].type.decode("ascii")
         if filter and type not in filter:
             continue
         try:

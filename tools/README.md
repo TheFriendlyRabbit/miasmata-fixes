@@ -8,7 +8,8 @@ The files in this directory are not used by any other scripts in the repository.
 extractors.py
 ---------
 Extracts a variety of assets from the game into human-readable formats:
-- Exports the game's height map, ``cterr_hmap``, as an image
+- Exports the game's height map, ``cterr_hmap``, as an image (``cterr_hmap.png``)
+- Exports the island's shoreline overlaid on top of the game's map (``smap_out.png``)
 
 
 interpret.py

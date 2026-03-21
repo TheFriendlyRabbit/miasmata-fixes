@@ -1,3 +1,7 @@
+# To run: ``pylint *.py lib patches tools``
+# Excluding translations for now, until I can figure out how to get Pylint to see GIMP...
 [MAIN]
+# Allows us to see the current root (and therefore our module folders).
+init-hook='import sys; sys.path.append(".")'
 # Allows Pylint to see Qt methods.
-extension-pkg-allow-list=PySide6
+extension-pkg-allow-list=PySide6,PIL

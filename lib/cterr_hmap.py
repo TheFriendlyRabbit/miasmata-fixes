@@ -1,12 +1,30 @@
 #!/usr/bin/env python
 
+"""
+Functions for reading and manipulating data from the game's ``cterr_hamp`` file,
+which is used to store the height map for the island.
+"""
+
 import io
 import math
 
 import numpy as np
 from PIL import Image
 
-import rs5file
+from lib import rs5file
+
+
+# Constant values used in image export
+MAX_HEIGHT = 255    # Max "normal" height (excluding orbital launch site)
+MIN_HEIGHT = -255   # Min "normal" height (excluding some very deep ocean areas)
+
+MIN_GREEN = -32     # Cutoff point for green values
+MIN_OCEAN = -187    # Bottom of the ocean?
+
+# Abnormal values - we only normalize against these when the data is
+# outside the normal range (-255 to 255).
+MIN_Z = -2047.8125  # Lowest value in the map data
+MAX_Z = 1967.375    # Highest value in the map data
 
 
 def open_cterr_hmap_from_rs5(main_rs5):
@@ -36,26 +54,15 @@ def hmap_to_image(main_rs5):
     :return: ``PIL.Image`` object containing the image data
     :rtype: PIL.Image
     """
-    mx = 255       # Max "normal" height (excluding orbital launch site)
-    mn = -255      # Min "normal" height (excluding some very deep ocean areas)
-
-    mn2 = -32      # Cutoff point for green values
-    mn3 = -187     # Bottom of the ocean?
-
-    # Abnormal values - we only normalize against these when the data is
-    # outside the normal range (-255 to 255).
-    abs_mn = -2047.8125     # Lowest value in the map data
-    abs_mx = 1967.375       # Highest value in the map data
-
     heights = open_cterr_hmap_from_rs5(main_rs5)
     land_mask = heights > 0  # Everything above sea level
-    over_max_mask = heights > mx  # Points that are too high (e.g. launch site)
-    under_min_mask = heights < mn  # Points that are abnormally low
+    over_max_mask = heights > MAX_HEIGHT  # Points that are too high (e.g. launch site)
+    under_min_mask = heights < MIN_HEIGHT  # Points that are abnormally low
     bad_mask = np.logical_or(over_max_mask, under_min_mask) # All invalid points
-    mn3_mask = heights <= mn3
+    min_ocean_mask = heights <= MIN_OCEAN
 
     # Values normalized against the absolute max or min
-    abs_normal = np.where(over_max_mask, heights * 255 / abs_mx, heights * 255 / abs_mn)
+    abs_normal = np.where(over_max_mask, heights * 255 / MAX_Z, heights * 255 / MIN_Z)
 
     # Red channel:
     # Above water level, red is the height of the terrain.
@@ -63,7 +70,7 @@ def hmap_to_image(main_rs5):
     # EXCEPT at bad height values, where red is either normalized against the
     # overall max and min values, or, if greater than mn but less than mn3, is 128.
     red = np.where(land_mask, heights, 0)
-    red = np.where(mn3_mask, 128, red)
+    red = np.where(min_ocean_mask, 128, red)
     red = np.where(bad_mask, abs_normal, red) # Normalize bad values
 
     # Green channel:
@@ -71,8 +78,8 @@ def hmap_to_image(main_rs5):
     # Below water level, green is the proximity of underwater land to the
     # surface, with mn2 as the zero level, except where the height is <= mn3
     # but greater than mn, in which case it's 128.
-    green = np.where(land_mask, heights, (255 - (heights * 255 / mn2)) / 2)
-    green = np.where(mn3_mask, 128, green)
+    green = np.where(land_mask, heights, (255 - (heights * 255 / MIN_GREEN)) / 2)
+    green = np.where(min_ocean_mask, 128, green)
     green = np.where(bad_mask, 0, green)
     green = np.clip(green, 0, 255) # Clip below mn2
 
@@ -82,9 +89,9 @@ def hmap_to_image(main_rs5):
     blue = np.where(land_mask, heights, 255 + heights)
     blue = np.where(bad_mask, 0, blue)  # Mask out bad values
 
-    img_cols = np.dstack((red,green,blue)).astype(np.uint8)
-    export_img = Image.fromarray(img_cols)
-    return export_img.transpose(Image.FLIP_TOP_BOTTOM)
+    # Combine RGB Numpy arrays and convert to PIL Image
+    export_img = Image.fromarray(np.dstack((red,green,blue)).astype(np.uint8))
+    return export_img.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
 
 
 # vi:noexpandtab:sw=8:ts=8
