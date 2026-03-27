@@ -51,7 +51,7 @@ class DDSPixelFormat():
 
 class DDSHeader:
     # http://msdn.microsoft.com/en-us/library/windows/desktop/bb943982(v=vs.85).aspx
-    class Flags():
+    class Flags:
         # Note: Don't rely on these flags - not all writers set them
         CAPS = 0x000001
         HEIGHT = 0x000002
@@ -87,6 +87,18 @@ BIT_SHIFT_ARR = np.array([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28,
 ALPHA_SHIFT_ARR = np.array([0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45],dtype=np.uint8)
 
 def open_dds(fp, mipmap=None, mode='RGBA'):
+    """
+    Reads a DDS image from a binary stream, and converts the image data to a PIL
+    image.
+    :param fp: The input binary stream object.
+    :type fp: _io.BytesIO
+    :param mipmap: (optional) Tuple mipmap of the texture to load (e.g. (1024, 1024))
+    :type mipmap: tuple[int]
+    :param mode: The color space of the texture. 'RGBA' or 'RGB'.
+    :type mode: str
+    :return: A PIL ``Image`` containing the loaded texture.
+    :rtype: PIL.Image
+    """
     if fp.read(4) != b'DDS ':
         raise ValueError('Not a DDS file')
     header = DDSHeader(fp)
@@ -110,9 +122,9 @@ def open_dds(fp, mipmap=None, mode='RGBA'):
         while mipmap < (width, height):
             fp.seek(width * height * block_size // 16, 1)
             (width, height) = (width // 2, height // 2)
+            h_count, w_count = height // 4, width // 4
 
-    l = width * height // 16 * block_size
-    buf = np.frombuffer(fp.read(l), fmt)
+    buf = np.frombuffer(fp.read(width * height // 16 * block_size), fmt)
 
     def rgb565(c):
         r = (c & 0xf800) >> 8
@@ -183,24 +195,43 @@ def open_dds(fp, mipmap=None, mode='RGBA'):
 
 
 def open_rs5file_imag(file, mipmap=None, mode='RGBA'):
+    """
+    Loads an ``IMAG`` DDS texture from a ``Rs5ChunkedFileDecoder``.
+    :param file: The ``Rs5ChunkedFileDecoder`` containing the image.
+    :type file: lib.rs5file.Rs5ChunkedFileDecoder
+    :param mipmap: (optional) Tuple mipmap of the texture to load (e.g. (1024, 1024))
+    :type mipmap: tuple[int]
+    :param mode: The color space of the texture. 'RGBA' or 'RGB'.
+    :type mode: str
+    :return: A PIL ``Image`` containing the loaded texture.
+    :rtype: PIL.Image
+    """
     return open_dds(file['DATA'].get_fp(), mipmap, mode)
 
 
 def load_rs5file_imag(file, mipmap=None, mode='RGBA', rs5_dir=None, archive=None):
     """
-    Loads a texture from main.rs5.
+    Loads a texture from an rs5 file.
+
+    If ``archive`` is provided (an ``Rs5ArchiveDecoder``), the image will be
+    loaded from there.
+
+    Otherwise, if ``rs5_dir`` is provided, attempts to load ``main.rs5``
+    from that directory.
+    If ``rs5_dir`` is not provided, attempts to load ``main.rs5`` from the
+    default Miasmata directory.
     :param file: The name of the texture to load (e.g. "Map_FilledIn" for the map)
-    :ptype file: str
-    :param mipmap: Mipmap of the texture to load (e.g. (1024, 1024) for the map)
-    :ptype mipmap: int tuple
+    :type file: str
+    :param mipmap: Tuple mipmap of the texture to load (e.g. (1024, 1024))
+    :type mipmap: tuple[int]
     :param mode: The color space of the texture. 'RGBA' or 'RGB'.
-    :ptype mode: str
+    :type mode: str
     :param rs5_dir: (optional) The directory for the rs5 file.
-    :ptype rs5_dir: str
-    :param archive: (optional) An already-loaded rs5 file.
-    :ptype archive: ``Rs5ArchiveDecoder``
+    :type rs5_dir: str
+    :param archive: (optional) An already-loaded rs5 file. Overrides ``rs5_dir``
+    :type archive: lib.rs5archive.Rs5ArchiveDecoder
     :return: A PIL ``Image`` containing the loaded texture.
-    :rtype: ``PIL.Image``
+    :rtype: PIL.Image
     """
     if not archive:
         print('Opening main.rs5...')

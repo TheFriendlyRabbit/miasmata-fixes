@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 
-from lib import miasmap, inst_header
+from lib import miasmap, miasutil, inst_header, inst_node
 
 
 def main():
     map_obj = miasmap.Miasmap()
-    nodes = open('inst_list', 'r').readlines()
-    nodes = set([int(x[9:-1]) for x in nodes])
-    for (n, (x1, y1, z1, x2, y2, z2)) in inst_header.get_points():
-        if n % 10000 == 0:
+    main_rs5 = miasutil.load_rs5_file('main.rs5')
+    inst_header_obj = inst_header.open_inst_header_from_rs5(main_rs5)
+    nodes = [idx for _, idx, _ in inst_node.iterate_over_inods(main_rs5)]
+    for (n, (x1, y1, z1, x2, y2, z2)) in inst_header.get_points(inst_header_obj):
+        if n % 1000 == 0:
             print(n, '...')
 
         # def fmt_flt(f):
@@ -24,7 +25,7 @@ def main():
             continue
 
         map_obj.plot_node(x1, y1, z1, x2, y2, z2)
-    map_obj.save_image('all_nodes_exists.jpg')
+    map_obj.save_image('all_nodes_exists.png')
 
 
 if __name__ == '__main__':

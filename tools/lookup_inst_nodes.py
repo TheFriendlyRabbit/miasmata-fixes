@@ -1,13 +1,18 @@
 #!/usr/bin/env python
 
-import os
 import sys
 
-from lib import inst_header
+from lib import inst_header, inst_node, miasutil
 from lib.miasmap import Miasmap
 
 
 def main():
+    print("Loading main.rs5...")
+    main_rs5 = miasutil.load_rs5_file('main.rs5')
+    inst_header_obj = inst_header.open_inst_header_from_rs5(main_rs5)
+
+    inst_node_indices = [idx for _, idx, _ in inst_node.iterate_over_inods(main_rs5)]
+
     (x, y) = list(map(float, sys.argv[1:3]))
     map_obj = Miasmap()
 
@@ -16,14 +21,14 @@ def main():
     print('Rotated back to inst coordinates: %d x %d' % (x, y))
     map_obj.plot_point(x, y, (255, 255, 255), (230, 230, 230))
 
-    for (n, (x1, y1, z1, x2, y2, z2)) in inst_header.get_points():
+    for (n, (x1, y1, z1, x2, y2, z2)) in inst_header.get_points(inst_header_obj):
         assert x2 > x1
         assert y2 > y1
         if x >= int(x1) and x <= int(x2) and \
                 y >= int(y1) and y <= int(y2):
             c = r = ''
             exists = 64
-            if not os.path.exists('nodes/inst_node%d' % n):
+            if n not in inst_node_indices:
                 c = '\x1b[31m'
                 r = '\x1b[0m'
                 exists = 0

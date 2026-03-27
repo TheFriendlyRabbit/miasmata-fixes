@@ -8,8 +8,8 @@ import re
 from io import BytesIO
 
 import environment
-import inst_node
-from lib import miasutil, inst_header, cterr_hmap, rs5archive, rs5mod, rs5file
+from lib import miasutil, inst_header, cterr_hmap, rs5archive, rs5mod, rs5file, \
+    inst_node
 
 # 1: Dumb round robin random mode, all items just selected at random.
 #    Way to easy to find goal items, so not recommended for plants.
@@ -298,8 +298,8 @@ def spoil(plants, spoiler_filename='spoiler.jpg'):
 
     points = {}
 
-    for inod_fname, inod_index, node in iterate_over_inods(main_rs5,
-                                                           inst_node_names):
+    for inod_fname, inod_index, node in inst_node.iterate_over_inods(main_rs5,
+                                                                     inst_node_names):
         try:
             plant = search_inst_ids[node.node_model_idx]
             points.setdefault(plant, []).append((int(node.x), int(node.y)))
@@ -341,22 +341,6 @@ def add_mod_meta(rs5, name, version):
     chunks = rs5file.Rs5ChunkedFileEncoder('META', rs5mod.mod_meta_file, 1,
                                            chunks)
     rs5.add_from_buf(chunks.encode())
-
-
-def iterate_over_inods(main_rs5, inst_node_names, blacklist_inods=None):
-    for inod_fname, compressed_file in main_rs5.items():
-        if compressed_file.type != b'INOD':
-            continue
-        inod_index = int(inod_fname[9:])  # strip "inst_node" from filename
-        assert (inod_fname == 'inst_node%i' % inod_index)
-        if blacklist_inods:
-            if inod_index in blacklist_inods:
-                print('Skipping blacklisted %s' % inod_fname)
-                continue
-        decompressed = compressed_file.decompress()
-        nodes = inst_node.parse_inod(BytesIO(decompressed), inst_node_names)
-        for node in nodes:
-            yield [inod_fname, inod_index, node]
 
 
 def generate_and_install_randomizer(seed=None):
@@ -425,9 +409,9 @@ def generate_and_install_randomizer(seed=None):
     item_clusters = {}
     item_ids = {}
 
-    for inod_fname, inod_index, node in iterate_over_inods(main_rs5,
-                                                           inst_node_names,
-                                                           blacklist_inods):
+    for inod_fname, inod_index, node in inst_node.iterate_over_inods(main_rs5,
+                                                                     inst_node_names,
+                                                                     blacklist_inods):
         # u1 appears to be a unique object ID
         if node.node_model_idx not in search_inst_ids:
             continue

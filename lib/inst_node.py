@@ -3,6 +3,7 @@
 import struct
 import sys
 
+from io import BytesIO
 from lib import inst_header
 
 
@@ -73,6 +74,43 @@ def encode_inod(filename, entries):
     r += b'\0' * 4
     h = enc_inod_header(filename, len(r), len(entries))
     return h + r
+
+
+def iterate_over_inods(main_rs5, inst_node_names=None, blacklist_inods=None):
+    """
+    Generator. Yields nodes from all ``INOD`` s in a given ``main.rs5``,
+    as lists, in the following format:
+
+    - The full name of the parent ``INOD`` (``inst_node%i``) (``str``)
+    - The index of the parent ``INOD`` (the ``%i``) (``int``)
+    - The actual node object itself (``Inod``)
+
+    :param main_rs5: ``Rs5ArchiveDecoder`` object for ``main.rs5``.
+    :type main_rs5: lib.rs5archive.Rs5ArchiveDecoder
+    :param inst_node_names: (optional) A list of node names obtained from ``inst_header.get_name_list``. Calculated in-function if not already provided.
+    :type inst_node_names: list[str]
+    :param blacklist_inods: ``INOD`` indices to blacklist- e.g. the orbital launch site.
+    :type blacklist_inods: int tuple
+    :return: A list containing the parent ``INOD`` name, index, and this node.
+    :rtype: Iterator[[str, int, Inod]]
+    """
+    if not inst_node_names:
+        inst_header_fp = inst_header.open_inst_header_from_rs5(main_rs5)
+        inst_node_names = inst_header.get_name_list(inst_header_fp)
+
+    for inod_fname, compressed_file in main_rs5.items():
+        if compressed_file.type != b'INOD':
+            continue
+        inod_index = int(inod_fname[9:])  # strip "inst_node" from filename
+        assert (inod_fname == 'inst_node%i' % inod_index)
+        if blacklist_inods:
+            if inod_index in blacklist_inods:
+                print('Skipping blacklisted %s' % inod_fname)
+                continue
+        decompressed = compressed_file.decompress()
+        nodes = parse_inod(BytesIO(decompressed), inst_node_names)
+        for node in nodes:
+            yield [inod_fname, inod_index, node]
 
 
 ## Find all objects within a node:
