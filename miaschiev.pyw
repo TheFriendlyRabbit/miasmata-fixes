@@ -14,8 +14,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QLabel
 
 import data
 import exposure_map
-import markers
-from lib import miasutil, imag, smap, rs5file
+from lib import miasutil, imag, smap, rs5file, markers
 from lib.miasmap import Miasmap
 from ui.miaschiev_ui import Ui_Miaschiev
 

@@ -8,7 +8,7 @@ from lib import rs5file
 
 def parse_nlst_header(f):
     (num_entries, u2) = struct.unpack('<H2s', f.read(4))
-    assert (u2 == b'\x00\x00')
+    assert u2 == b'\x00\x00'
     return num_entries
 
 
@@ -17,7 +17,7 @@ def parse_markers(chunks):
     mlst = chunks['MLST']
 
     f = nlst.get_fp()
-    num_entries = parse_nlst_header(f)
+    f.seek(4, 1) # Skip past the header (see parse_nlst_header)
     nlst = f.read(nlst.size - 4)
     nlst = nlst.rstrip(b'\0').split(b'\0')
 

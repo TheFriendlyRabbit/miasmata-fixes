@@ -1,15 +1,17 @@
 #!/usr/bin/env python
 
+import time
 from lib import miasmap, miasutil, inst_header, inst_node
 
 
 def main():
+    start = time.time()
     map_obj = miasmap.Miasmap()
     main_rs5 = miasutil.load_rs5_file('main.rs5')
     inst_header_obj = inst_header.open_inst_header_from_rs5(main_rs5)
-    nodes = [idx for _, idx, _ in inst_node.iterate_over_inods(main_rs5)]
+    nodes = set([idx for _, idx, _ in inst_node.iterate_over_inods(main_rs5)])
     for (n, (x1, y1, z1, x2, y2, z2)) in inst_header.get_points(inst_header_obj):
-        if n % 1000 == 0:
+        if n % 10000 == 0:
             print(n, '...')
 
         # def fmt_flt(f):
@@ -25,6 +27,8 @@ def main():
             continue
 
         map_obj.plot_node(x1, y1, z1, x2, y2, z2)
+    end = time.time()
+    print(f"Completed in {end - start} seconds.")
     map_obj.save_image('all_nodes_exists.png')
 
 

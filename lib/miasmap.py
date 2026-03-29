@@ -3,6 +3,8 @@
 import os
 import sys
 
+import numpy as np
+
 from PIL import Image
 
 from lib import imag
@@ -16,6 +18,26 @@ SCALE = 2
 
 MAP_FILLEDIN_PATH = 'Map_FilledIn.png'
 
+
+def add_and_clamp(target, add_arr):
+    # todo: is it faster to do this, or just use a uint16?
+    target += add_arr
+    target[target < add_arr] = 255
+
+def np_interpolate_cols(c1, c2, length):
+    """
+    Constructs an array of colors forming a gradient between ``c1`` and ``c2``.
+    :param c1: First color
+    :type c1: np.ndarray
+    :param c2: Second color
+    :type c2: np.ndarray
+    :param length: The length of the color gradient in pixels
+    :type length: int
+    :return: An array of colors representing the gradient between ``c1`` and ``c2``.
+    :rtype: np.ndarray
+    """
+    return np.rint(np.repeat(np.reshape(np.arange(0, length) / length, (-1, 1)), 3, 1) * (c2 - c1) + c1).astype(np.uint8)
+
 class Miasmap:
     """
     An image of the game's map, which can have points plotted on it.
@@ -28,9 +50,10 @@ class Miasmap:
 
     def load_map(self, game_path=None):
         if not os.path.isfile(MAP_FILLEDIN_PATH):
-            self.image = imag.load_rs5file_imag("Map_FilledIn", (1024, 1024), 'RGB', game_path)
+            self.image = imag.load_rs5file_imag("Map_FilledIn", (WIDTH, HEIGHT), 'RGB', game_path)
             print('Saving image...')
             self.image.save(MAP_FILLEDIN_PATH)
+            self.image = self.image.rotate(270)
         else:
             try:
                 self.image = Image.open(MAP_FILLEDIN_PATH).rotate(270).resize((WIDTH, HEIGHT))
@@ -40,11 +63,12 @@ class Miasmap:
                 traceback.print_exc()
                 self.image = Image.new('RGB', (WIDTH, HEIGHT), (0, 0, 0))
         self.image = Image.eval(self.image, lambda x: x / 3)
-        self.pix = self.image.load()
+        self.pix = np.array(self.image)
 
 
     def save_image(self, filename):
         print('Saving %s...' % filename, file=sys.stderr)
+        self.image = Image.fromarray(self.pix)
         self.image.rotate(90).save(filename)
 
 
@@ -60,29 +84,24 @@ class Miasmap:
             self.pix[x, y] = (r, g, b)
 
 
-    def plot_rect(self, x1, y1, c1, x2, y2, c2):
-        xr = x2 - x1
-        yr = y2 - y1
+    def plot_rect(self, in_x1, in_y1, c1, in_x2, in_y2, c2):
 
-        def interpolate(p):
-            return [int(p * v1 + (1.0 - p) * v2) for (v1, v2) in zip(c1, c2)]
+        # Average of the two colors
+        midpoint_col = (c1 + c2) * 0.5
 
-        for x in range(x1, x2 + 1, SCALE):
-            p = float(x - x1) / xr
-            p1 = p / 2.0
-            p2 = p1 + 0.5
-            rgb1 = interpolate(p1)
-            rgb2 = interpolate(p2)
-            self.plot(x, y1, rgb1)
-            self.plot(x, y2, rgb2)
-        for y in range(y1 + 1, y2, SCALE):
-            p = float(y - y1) / yr
-            p1 = p / 2.0
-            p2 = p1 + 0.5
-            rgb1 = interpolate(p1)
-            rgb2 = interpolate(p2)
-            self.plot(x1, y, rgb1)
-            self.plot(x2, y, rgb2)
+        # Swap the input "x" and "y" coordinates here to respect the
+        # PIL -> Numpy conversion
+        # (TODO: fix the other plot functions to also respect this)
+        x1 = max(0, min(np.int16(np.rint(in_y1 / SCALE)), WIDTH - 1))
+        y1 = max(0, min(np.int16(np.rint(in_x1 / SCALE)), HEIGHT - 1))
+        x2 = max(0, min(np.int16(np.rint(in_y2 / SCALE)), WIDTH - 1))
+        y2 = max(0, min(np.int16(np.rint(in_x2 / SCALE)), HEIGHT - 1))
+
+        add_and_clamp(self.pix[x1, y1:y2 + 1], np_interpolate_cols(c2, midpoint_col, abs(y1 - (y2 + 1))))
+        add_and_clamp(self.pix[x2, y1:y2 + 1], np_interpolate_cols(midpoint_col, c1, abs(y1 - (y2 + 1))))
+
+        add_and_clamp(self.pix[x1:x2 + 1, y1], np_interpolate_cols(c2, midpoint_col, abs(x1 - (x2 + 1))))
+        add_and_clamp(self.pix[x1:x2 + 1, y2], np_interpolate_cols(midpoint_col, c1, abs(x1 - (x2 + 1))))
 
 
     def plot_point(self, x, y, rgb1=(255, 255, 255), rgb2=(192, 192, 192)):
@@ -106,18 +125,18 @@ class Miasmap:
                 self.plot(x1, y1, rgb, additive)
 
     def plot_node(self, x1, y1, z1, x2, y2, z2, r=64, wierd=8, exists=64):
-        l1 = int((z1 - MINZ) * 255.0 / (MAXZ - MINZ))
-        l2 = int((z2 - MINZ) * 255.0 / (MAXZ - MINZ))
+        l1 = np.rint((z1 - MINZ) * 255.0 / (MAXZ - MINZ))
+        l2 = np.rint((z2 - MINZ) * 255.0 / (MAXZ - MINZ))
 
         if z1 == 10000000.0 or z2 == -1000000.0:
-            rgb1 = rgb2 = (0, 0, wierd)
+            rgb1 = rgb2 = np.array([0, 0, wierd])
         elif exists:
-            rgb1 = (exists, l1, 0)
-            rgb2 = (exists, l2, 0)
+            rgb1 = np.array([exists, l1, 0])
+            rgb2 = np.array([exists, l2, 0])
         else:
-            rgb1 = (r, 0, 0)
-            rgb2 = (r, 0, 0)
+            rgb1 = np.array([r, 0, 0])
+            rgb2 = np.array([r, 0, 0])
 
-        self.plot_rect(int(x1), int(y1), rgb1, int(x2), int(y2), rgb2)
+        self.plot_rect(np.rint(x1), np.rint(y1), rgb1, np.rint(x2), np.rint(y2), rgb2)
 
 # vi:noexpandtab:sw=8:ts=8
