@@ -207,18 +207,18 @@ def dump_bad_nodes():
         (node_idx, (x1, y1, z1, x2, y2, z2)) = inst_node_bounds
         if node.z < min_z_blacklist_whole_node:  # Way too far below water,
             # unreachable
-            colour = (255, 0, 0)
+            colour = [255, 0, 0]
         elif node.z <= 0:  # Some legitimately below water level, but need to
             # check
-            colour = (0, 255, 0)
+            colour = [0, 255, 0]
         elif altitude < -1:
-            colour = (64 + int(-altitude), 0, 0)
+            colour = [64 + int(-altitude), 0, 0]
         elif altitude < 0:
             # colour = (128,0,0)
-            colour = (0, 1 + int(-altitude), 0)
+            colour = [0, 1 + int(-altitude), 0]
         else:
             # colour = (0,0,128) #+int(z))
-            colour = (0, 0, 32 + int(altitude))
+            colour = [0, 0, 32 + int(altitude)]
         if True:  # Items shown as big fat easy to see square
             bad_nodes_map.plot_square(int(node.x), int(node.y), 20, colour)
         else:  # Items as tiny points
@@ -312,8 +312,7 @@ def spoil(plants, spoiler_filename='spoiler.jpg'):
     # Anything requested without a colour:
     for plant in set(points).difference(spoiler_plant_colours):
         for x, y in points[plant]:
-            spoiler_map.plot_square(int(x), int(y), 20, (255, 255, 255),
-                                    additive=False)
+            spoiler_map.plot_square(int(x), int(y), 20, additive=False)
     spoiler_map.save_image(spoiler_filename)
 
 
