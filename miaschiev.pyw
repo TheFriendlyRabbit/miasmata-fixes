@@ -202,7 +202,7 @@ class Miaschiev(QMainWindow):
         # Game coords are rotated 90 degrees clockwise and in the range
         # 8192.0 x 8192.0. Rotate coord 90 degrees counter-clockwise
         # (transpose then mirror y), then divide by 8.
-        return map(int, (coords[0] / 8, (8192 - coords[1]) / 8))
+        return map(int, (coords[1] / 8, (8192 - coords[0]) / 8))
 
     def gen_map(self, save):
         if not self.main_rs5_loaded():

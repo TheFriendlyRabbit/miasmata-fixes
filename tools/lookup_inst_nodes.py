@@ -11,7 +11,7 @@ def main():
     main_rs5 = miasutil.load_rs5_file('main.rs5')
     inst_header_obj = inst_header.open_inst_header_from_rs5(main_rs5)
 
-    inst_node_indices = [idx for _, idx, _ in inst_node.iterate_over_inods(main_rs5)]
+    inst_node_indices = set([idx for _, idx, _ in inst_node.iterate_over_inods(main_rs5)])
 
     (x, y) = list(map(float, sys.argv[1:3]))
     map_obj = Miasmap()

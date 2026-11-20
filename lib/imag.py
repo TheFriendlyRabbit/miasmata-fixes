@@ -83,8 +83,12 @@ class DDSHeader:
         assert size == 124
         assert self.flags & self.Flags.REQUIRED == self.Flags.REQUIRED
 
-BIT_SHIFT_ARR = np.array([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30],dtype=np.uint8)
-ALPHA_SHIFT_ARR = np.array([0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45],dtype=np.uint8)
+BIT_SHIFT_ARR = np.array([
+    0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30
+],dtype=np.uint8)
+ALPHA_SHIFT_ARR = np.array([
+    0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45
+],dtype=np.uint8)
 
 def open_dds(fp, mipmap=None, mode='RGBA'):
     """

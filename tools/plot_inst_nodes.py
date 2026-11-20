@@ -13,19 +13,8 @@ def main():
     for (n, (x1, y1, z1, x2, y2, z2)) in inst_header.get_points(inst_header_obj):
         if n % 10000 == 0:
             print(n, '...')
-
-        # def fmt_flt(f):
-        #	return '%f' % f
-        # print '\t'.join(map(fmt_flt, (x, y, z)))
-
-        # if z1 == 10000000.0 or z2 == -1000000.0:
-        # 	assert(not os.path.exists('nodes/inst_node%d' % n))
-
-        # if not os.path.exists('nodes/inst_node%d' % n):
-        #	continue
         if not n in nodes:
             continue
-
         map_obj.plot_node(x1, y1, z1, x2, y2, z2)
     end = time.time()
     print(f"Completed in {end - start} seconds.")

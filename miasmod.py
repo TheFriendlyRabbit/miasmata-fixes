@@ -35,8 +35,8 @@ def conf_path(install_path):
     return os.path.join(install_path, 'miasmod.conf')
 
 
-class ModList():
-    class mod():
+class ModList:
+    class Mod:
         def __init__(self, name, path, basename, type, note=None, include=True,
                      version=None):
             self.rs5_name = None
@@ -116,7 +116,7 @@ class ModList():
         if name in l:
             l[name].add(path, basename, ext, note, include, version)
         else:
-            l[name] = ModList.mod(name, path, basename, ext, note, include,
+            l[name] = ModList.Mod(name, path, basename, ext, note, include,
                                   version)
 
     def extend(self, iterable, includes=None):
@@ -218,7 +218,7 @@ class Rs5ModListModel(QtCore.QAbstractTableModel):
     def refresh(self):
         try:
             mod_order = rs5mod.ModOrderDecoder(self.rs5)
-        except Exception as e:
+        except Exception:
             mod_order = []
         self.mods = []
         for manifest in rs5mod.rs5_mods(self.rs5):
@@ -579,7 +579,7 @@ class MiasMod(QMainWindow):
                    ' alocalmod.miasmod instead.\n\nWhat would you like to' \
                    ' do?'
         else:
-            assert (mod.name == 'communitypatch')
+            assert mod.name == 'communitypatch'
             msg2 = 'Are you sure you wish to edit the community' \
                    ' patch? Unless you know what you are doing you probably' \
                    ' should edit a local mod (e.g. alocalmod.miasmod)' \
@@ -763,7 +763,7 @@ class MiasMod(QMainWindow):
         self.progress('Creating alocalmod...')
 
         path = os.path.join(self.install_path, 'alocalmod.miasmod')
-        mod = ModList.mod('alocalmod', path, os.path.basename(path), 'miasmod')
+        mod = ModList.Mod('alocalmod', path, os.path.basename(path), 'miasmod')
         path = os.path.join(self.install_path, 'alocalmod.rs5')
         mod.add(path, os.path.basename(path), 'rs5')
 

@@ -57,11 +57,10 @@ def find_miasmata_save():
         import winpaths
         return os.path.join(winpaths.get_appdata(), 'IonFx', 'Miasmata',
                             'saves.dat')
-    else:
-        # default Steam saves location
-        return (f'{os.getenv("HOME")}/.local/share/Steam/steamapps/compatdata'
-                f'/223510/pfx/drive_c/users/steamuser/AppData/Roaming/IonFx'
-                f'/Miasmata/saves.dat')
+    # default Steam saves location on Linux
+    return (f'{os.getenv("HOME")}/.local/share/Steam/steamapps/compatdata'
+            f'/223510/pfx/drive_c/users/steamuser/AppData/Roaming/IonFx'
+            f'/Miasmata/saves.dat')
 
 
 def load_rs5_file(filename, directory=None):
@@ -85,6 +84,6 @@ def load_rs5_file(filename, directory=None):
         return rs5archive.Rs5ArchiveDecoder(open(file_path, 'rb'))
     except Exception as e:
         print(f"ERROR loading RS5 archive file {file_path}!")
-        raise Exception(e)
+        raise Exception(e) from e
 
 # vi:noexpandtab:sw=8:ts=8

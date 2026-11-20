@@ -49,7 +49,7 @@ _Currently it requires certain files to have already been extracted into
 specific locations - TODO is the ability to read them directly from main.rs5._
 
 
-rs5-extractor.py
+rs5_extractor.py
 ---------
 
 This script can extract the contents of an RS5 archive into to a directory, or

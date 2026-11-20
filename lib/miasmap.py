@@ -95,7 +95,7 @@ class Miasmap:
         self.pix = np.array(self.image)
 
     def save_image(self, filename):
-        print('Saving %s...' % filename, file=sys.stderr)
+        print(f'Saving {filename}...', file=sys.stderr)
         self.image = Image.fromarray(self.pix)
         self.image.rotate(90).save(filename)
 

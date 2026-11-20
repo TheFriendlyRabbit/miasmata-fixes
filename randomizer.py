@@ -401,6 +401,10 @@ def generate_and_install_randomizer(seed=None):
     # modes should avoid this issue since nearby plants will be changed
     # together, including overlaps, but needs further thought & testing.
     inst_header_fp.seek(0)
+
+    # AURA TODO: iterate_over_inods returns a LOT of numbers - it seems like
+    # it's probably faster to do the iterating over get_points and check against
+    # a set of iterate_over_inods (as in plot_inst_nodes)
     inst_node_bounds = list(inst_header.get_points(inst_header_fp))
     print('Total instance nodes in inst_header: %i' % len(inst_node_bounds))
 

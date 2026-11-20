@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-To run: ``python -m tools.rs5-extractor [args]``
+To run: ``python -m tools.rs5_extractor [args]``
 """
 
 import os
